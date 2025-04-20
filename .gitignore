@@ -1,0 +1,19 @@
+# Configuration files
+config/database.php
+
+# Vendor directory
+vendor/
+
+# Log files
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.idea/
+.vscode/
+
+# Environment specific files
+.env
