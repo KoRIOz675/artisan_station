@@ -1,0 +1,148 @@
+.login-register-container {
+    display: flex;
+    justify-content: center; /* Center forms horizontally */
+    align-items: flex-start; /* Align items to the top */
+    flex-wrap: wrap;
+    padding: 50px 20px; /* More vertical padding */
+    max-width: 900px; /* Adjust max-width for the two forms + separator */
+    margin: 40px auto; /* Center the container */
+    gap: 5%; /* Adjust gap between forms */
+    position: relative; /* Needed for the separator line */
+    /* background-color: #F5F1ED; */
+}
+
+/* Separator Line */
+.login-register-container::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50px; /* Start below header potentially */
+    bottom: 50px; /* Stop above footer potentially */
+    width: 1px;
+    background-color: #D3B8AE; /* A soft brownish/reddish color */
+    transform: translateX(-50%);
+    /* Hide separator on smaller screens when forms stack */
+    display: block;
+}
+
+
+.form-container {
+    flex: 1; /* Allows both containers to grow */
+    min-width: 300px; /* Minimum width before wrapping */
+    max-width: 45%; /* Max width relative to container */
+    padding: 20px;
+    /* Remove background, border, shadow from original style */
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    box-sizing: border-box;
+}
+
+.form-container h2 {
+    text-align: center;
+    margin-bottom: 40px; /* More space below heading */
+    color: #333; /* Darker text */
+    font-family: 'Alata', sans-serif; /* Or another simple sans-serif */
+    font-weight: normal; /* Not bold */
+    font-size: 1.8em; /* Adjust size */
+    text-transform: uppercase;
+    letter-spacing: 2px; /* Add letter spacing */
+}
+
+.form-group {
+    margin-bottom: 25px; /* More space between form groups */
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: normal; /* Not bold */
+    color: #555; /* Label color */
+    font-size: 0.9em; /* Smaller label size */
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="password"] {
+    width: 100%;
+    padding: 12px 15px; /* Adjust padding */
+    border: 1px solid #a0a0a0; /* Subtle grey border */
+    border-radius: 6px; /* Slightly more rounded corners */
+    box-sizing: border-box;
+    font-size: 1em;
+    background-color: transparent; /* No background */
+    color: #333; /* Input text color */
+}
+
+.form-group input:focus {
+    border-color: #777; /* Darker border on focus */
+    outline: none;
+    box-shadow: none; /* Remove focus shadow */
+}
+
+.form-group .error-message {
+    color: #D8000C;
+    font-size: 0.8em; /* Slightly smaller error message */
+    margin-top: 6px;
+    display: block;
+    min-height: 1em; /* Prevent layout jump */
+}
+
+.form-group input.is-invalid {
+    border-color: #D8000C; /* Keep error border color */
+}
+
+/* Style for general error messages if needed */
+.form-group.general-error .error-message {
+    text-align: center;
+    font-weight: bold;
+}
+
+
+/* Button Styling */
+.form-button-group {
+    text-align: center; /* Center button within its wrapper */
+    margin-top: 30px; /* Space above button */
+}
+
+.btn {
+    display: inline-block; /* Allow text-align to work */
+    width: auto; /* Auto width based on content */
+    padding: 10px 40px; /* Adjust button padding */
+    background-color: #e0e0e0; /* Light grey background */
+    color: #444; /* Dark grey text */
+    border: none;
+    border-radius: 6px; /* Match input radius */
+    font-size: 1em; /* Adjust font size */
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-family: 'Alata', sans-serif; /* Match other fonts */
+    text-transform: none; /* Normal case for button text */
+    letter-spacing: 0.5px;
+}
+
+.btn:hover {
+    background-color: #c8c8c8; /* Darker grey on hover */
+}
+
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .login-register-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 0; /* Remove gap when stacking */
+        max-width: 500px; /* Adjust width for single column */
+    }
+    .form-container {
+        width: 100%; /* Take full width */
+        max-width: 100%; /* Override previous max-width */
+        margin-bottom: 30px; /* Add space between stacked forms */
+    }
+    .login-register-container::before {
+        display: none; /* Hide separator line */
+    }
+    .form-container:last-child {
+         margin-bottom: 0; /* No margin below the last form */
+    }
+}

@@ -1,0 +1,148 @@
+/* Header styles */
+
+#navbar {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex-direction: row;
+  max-height: 10em;
+  background-color: #eee9e5;
+}
+
+#navbar img {
+  height: 6em;
+}
+
+nav {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex-direction: row;
+  max-height: 10em;
+}
+
+nav a {
+  color: #735339;
+  font-size: 1.5em;
+  margin: 0.5em;
+  border-radius: 0.5em;
+  padding: 0.2em;
+  text-decoration: none;
+}
+
+nav a:hover {
+  background-color: #735339;
+  color: #f0f0f0;
+  transition: 0.3s;
+}
+
+nav span {
+  color: #800000;
+  font-size: 1.5em;
+  padding: 0.5em;
+  border-radius: 0.5em;
+}
+
+nav input[type="searchbar"] {
+  width: 100%;
+  max-width: 20em;
+  padding: 0.5em;
+  padding-left: 1em;
+  border-radius: 1em;
+  border: none;
+  background-color: #f0f0f0;
+  outline: #d9d9d9 solid 3px;
+  outline-offset: -3px;
+}
+
+nav input[type="searchbar"]::placeholder {
+  text-align: right;
+}
+
+#user-actions {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex-direction: row;
+  max-height: 10em;
+}
+
+.user-icon {
+  color: #735339;
+  font-size: 1.5em;
+  padding: 0.5em;
+  border-radius: 0.5em;
+}
+
+.user-icon:hover {
+  color: #f0f0f0;
+  background-color: #735339;
+  transition: 0.3s;
+}
+
+
+/* Footer styles */
+
+.footer {
+  background-color: #ddd9d5;
+  display: flex;
+  width: 100%;
+  height: auto;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  padding-left: 5em;
+  padding-right: 5em;
+}
+
+.left {
+  max-width: 20em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin: 2em;
+}
+
+.left img {
+  width: 20em;
+  height: auto;
+  object-position: center;
+}
+
+.left p {
+  color: #735339;
+  font-size: 1.5em;
+  margin: 0.5em;
+  padding: 0.2em;
+  text-align: left;
+}
+
+.right {
+  max-width: 20em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  align-items: flex-start;
+  flex-direction: column;
+  margin: 2em;
+}
+
+.right ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.right ul li {
+  color: #735339;
+  font-size: 1.5em;
+  padding-top: 0.1em;
+  padding-bottom: 0.1em;
+  text-align: left;
+}
+
+.right ul li a {
+  color: #735339;
+  text-decoration: none;
+}

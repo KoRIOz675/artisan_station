@@ -1,0 +1,221 @@
+.dashboard-container {
+    display: flex;
+    margin: 20px auto;
+    max-width: 1200px;
+    padding: 0 15px;
+    gap: 30px;
+    min-height: 600px; /* Minimum height for the container */
+}
+
+/* Tab Navigation Sidebar */
+.dashboard-nav {
+    flex: 0 0 200px; /* Fixed width sidebar */
+    background-color: #f8f9fa; /* Light grey background */
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid #dee2e6;
+    height: fit-content; /* Adjust height to content */
+}
+
+.dashboard-nav h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+    color: #333;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 10px;
+}
+
+.dashboard-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.dashboard-nav ul li {
+    margin-bottom: 5px;
+}
+
+.dashboard-nav ul li a {
+    display: block;
+    padding: 10px 15px;
+    color: #735339;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.dashboard-nav ul li a:hover {
+    background-color: #e9ecef; /* Light hover */
+    color: #735339;
+}
+
+.dashboard-nav ul li a.active {
+    background-color: #735339; /* Active tab background */
+    color: white; /* Active tab text color */
+    font-weight: bold;
+}
+
+/* Tab Content Area */
+.dashboard-content {
+    flex: 1; /* Takes remaining space */
+    background-color: #ffffff;
+    padding: 20px 30px;
+    border-radius: 5px;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.tab-pane {
+    display: none; /* Hide all panes by default */
+    animation: fadeIn 0.5s; /* Optional fade-in effect */
+}
+
+.tab-pane.active {
+    display: block; /* Show only the active pane */
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+
+/* General Content Styling */
+.dashboard-content h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #343a40;
+    border-bottom: 2px solid #735339;
+    padding-bottom: 10px;
+    font-size: 1.6em;
+}
+
+.dashboard-content p,
+.dashboard-content ul,
+.dashboard-content li {
+    line-height: 1.6;
+    color: #495057;
+}
+
+.dashboard-content ul {
+    padding-left: 20px;
+    margin-bottom: 15px;
+}
+.dashboard-content ul li {
+    margin-bottom: 8px;
+}
+
+.dashboard-content strong {
+     color: #212529;
+}
+
+/* Table Styling */
+.dashboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    margin-bottom: 20px;
+    font-size: 1em;
+}
+
+.dashboard-table th,
+.dashboard-table td {
+    border: 1px solid #dee2e6;
+    padding: 10px 12px;
+    /* text-align: center; */
+    vertical-align: top;
+}
+
+.dashboard-table thead th {
+    background-color: #e9ecef;
+    font-weight: bold;
+    color: #495057;
+}
+
+.dashboard-table tbody tr:nth-child(odd) {
+    background-color: #f8f9fa;
+}
+
+.dashboard-table tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+.dashboard-table a {
+    color: #735339;
+    text-decoration: none;
+}
+.dashboard-table a:hover {
+    text-decoration: underline;
+}
+
+
+/* Profile Section */
+.profile-info {
+    margin-bottom: 20px;
+}
+.profile-info li {
+    list-style: none;
+    margin-bottom: 10px;
+}
+
+/* Artisan Arts Section */
+.arts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); /* Responsive grid */
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.art-card {
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 10px;
+    text-align: center;
+    background-color: #f8f9fa;
+}
+
+.art-card img {
+    max-width: 100%;
+    height: 120px; /* Fixed height for consistency */
+    object-fit: cover; /* Scale image nicely */
+    margin-bottom: 10px;
+    border-radius: 3px;
+}
+
+.art-card h4 {
+    margin: 5px 0;
+    font-size: 1em;
+    color: #333;
+}
+
+.art-card a {
+    font-size: 0.9em;
+    margin: 0 5px;
+}
+
+.event-created {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #e9ecef;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+}
+
+.mt-20 { /* Margin top utility */
+    margin-top: 20px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .dashboard-container {
+        flex-direction: column;
+    }
+    .dashboard-nav {
+        flex: 1 1 auto; /* Allow nav to take full width */
+        margin-bottom: 20px;
+    }
+    .dashboard-content {
+        width: 100%;
+    }
+}

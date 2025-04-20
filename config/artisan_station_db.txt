@@ -1,0 +1,141 @@
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+
+-- --------------------------------------------------------
+-- Table structure for table `users`
+-- --------------------------------------------------------
+CREATE TABLE `users` (
+                         `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+                         `email` varchar(255) NOT NULL,
+                         `username` varchar(50) NOT NULL,
+                         `password_hash` varchar(255) NOT NULL,
+                         `first_name` varchar(100) DEFAULT NULL,
+                         `last_name` varchar(100) DEFAULT NULL,
+                         `role` enum('customer','artisan','admin') NOT NULL DEFAULT 'customer',
+                         `shop_name` varchar(150) DEFAULT NULL, -- Potentially only for 'artisan' role
+                         `bio` text DEFAULT NULL, -- Potentially only for 'artisan' role
+                         `profile_picture_path` varchar(255) DEFAULT NULL,
+                         `is_active` tinyint(1) NOT NULL DEFAULT 1,
+                         `is_featured_artisan` tinyint(1) NOT NULL DEFAULT 0, -- Potentially only for 'artisan' role
+                         `created_at` timestamp NULL DEFAULT current_timestamp(),
+                         `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+                         PRIMARY KEY (`id`),
+                         UNIQUE KEY `uk_users_email` (`email`),
+                         UNIQUE KEY `uk_users_username` (`username`),
+                         KEY `idx_users_role` (`role`),
+                         KEY `idx_users_is_active` (`is_active`),
+                         KEY `idx_users_is_featured_artisan` (`is_featured_artisan`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+-- Table structure for table `categories`
+-- --------------------------------------------------------
+CREATE TABLE `categories` (
+                              `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+                              `name` varchar(100) NOT NULL,
+                              `slug` varchar(120) NOT NULL,
+                              `description` text DEFAULT NULL,
+                              `image_path` varchar(255) DEFAULT NULL,
+                              `created_at` timestamp NULL DEFAULT current_timestamp(),
+                              `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+                              PRIMARY KEY (`id`),
+                              UNIQUE KEY `uk_categories_slug` (`slug`),
+                              KEY `idx_categories_name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+-- Table structure for table `products`
+-- --------------------------------------------------------
+CREATE TABLE `products` (
+                            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+                            `artisan_id` int(10) UNSIGNED NOT NULL,
+                            `category_id` int(10) UNSIGNED NOT NULL,
+                            `name` varchar(255) NOT NULL,
+                            `slug` varchar(270) NOT NULL,
+                            `description` text NOT NULL,
+                            `price` decimal(10,2) NOT NULL,
+                            `image_path` varchar(255) NOT NULL,
+                            `stock_quantity` int(10) UNSIGNED NOT NULL DEFAULT 0,
+                            `is_active` tinyint(1) NOT NULL DEFAULT 1,
+                            `is_featured` tinyint(1) NOT NULL DEFAULT 0,
+                            `created_at` timestamp NULL DEFAULT current_timestamp(),
+                            `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+                            PRIMARY KEY (`id`),
+                            UNIQUE KEY `uk_products_slug` (`slug`),
+                            KEY `idx_products_name` (`name`),
+                            KEY `idx_products_price` (`price`),
+                            KEY `idx_products_is_active` (`is_active`),
+                            KEY `idx_products_is_featured` (`is_featured`),
+                            KEY `fk_products_artisan_id` (`artisan_id`),
+                            KEY `fk_products_category_id` (`category_id`),
+                            CONSTRAINT `fk_products_artisan` FOREIGN KEY (`artisan_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE, -- An artisan must exist. Don't delete artisan if they have products.
+                            CONSTRAINT `fk_products_category` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE -- A category must exist. Don't delete category if it has products.
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+-- Table structure for table `events`
+-- --------------------------------------------------------
+CREATE TABLE `events` (
+                          `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+                          `artisan_id` int(10) UNSIGNED DEFAULT NULL, -- Allow NULL if event is general, not tied to one artisan
+                          `name` varchar(255) NOT NULL,
+                          `slug` varchar(270) NOT NULL,
+                          `description` text NOT NULL,
+                          `start_datetime` datetime NOT NULL,
+                          `end_datetime` datetime DEFAULT NULL,
+                          `location` varchar(255) DEFAULT NULL,
+                          `image_path` varchar(255) DEFAULT NULL,
+                          `is_active` tinyint(1) NOT NULL DEFAULT 1,
+                          `created_at` timestamp NULL DEFAULT current_timestamp(),
+                          `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+                          PRIMARY KEY (`id`),
+                          UNIQUE KEY `uk_events_slug` (`slug`),
+                          KEY `idx_events_start_datetime` (`start_datetime`),
+                          KEY `idx_events_is_active` (`is_active`),
+                          KEY `fk_events_artisan_id` (`artisan_id`),
+                          CONSTRAINT `fk_events_artisan` FOREIGN KEY (`artisan_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE -- If artisan is deleted, keep the event but remove the link.
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+-- Table structure for table `orders`
+-- --------------------------------------------------------
+CREATE TABLE `orders` (
+                          `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+                          `customer_id` int(10) UNSIGNED NOT NULL,
+                          `order_datetime` timestamp NOT NULL DEFAULT current_timestamp(),
+                          `total_amount` decimal(10,2) NOT NULL,
+                          `status` enum('pending','paid','processing','shipped','delivered','cancelled') NOT NULL DEFAULT 'pending',
+                          `shipping_address` text DEFAULT NULL,
+                          `billing_address` text DEFAULT NULL,
+                          `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+                          PRIMARY KEY (`id`),
+                          KEY `idx_orders_order_datetime` (`order_datetime`),
+                          KEY `idx_orders_status` (`status`),
+                          KEY `fk_orders_customer_id` (`customer_id`),
+                          CONSTRAINT `fk_orders_customer` FOREIGN KEY (`customer_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE -- A customer must exist. Don't delete customer if they have orders.
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+-- Table structure for table `order_items`
+-- --------------------------------------------------------
+CREATE TABLE `order_items` (
+                               `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+                               `order_id` int(10) UNSIGNED NOT NULL,
+                               `product_id` int(10) UNSIGNED NOT NULL,
+                               `quantity` int(10) UNSIGNED NOT NULL DEFAULT 1,
+                               `price_at_purchase` decimal(10,2) NOT NULL,
+    -- No created_at/updated_at needed here usually, lifecycle tied to order
+                               PRIMARY KEY (`id`),
+                               UNIQUE KEY `uk_order_items_order_product` (`order_id`, `product_id`), -- Can't have the same product twice in the same order row, adjust quantity instead
+                               KEY `fk_order_items_order_id` (`order_id`),
+                               KEY `fk_order_items_product_id` (`product_id`),
+                               CONSTRAINT `fk_order_items_order` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE ON UPDATE CASCADE, -- If order is deleted, delete its items.
+                               CONSTRAINT `fk_order_items_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE -- Don't delete a product if it's part of an order history.
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+COMMIT; -- Commit the transaction
