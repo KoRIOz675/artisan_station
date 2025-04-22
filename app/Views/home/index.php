@@ -57,33 +57,25 @@
         </section>
     <?php endif; ?>
 
-    <section class="content-section">
-        <hr class="featured-line">
-        <h2 class="section-title">Featured Creations</h2>
-        <div class="featured-products-container">
-            <?php if (isset($products) && !empty($products)): ?>
-                <?php foreach ($products as $product): ?>
-                    <?php if (is_object($product)): ?>
-                        <div class="product-card-featured">
-                            <a href="<?php echo URLROOT . '/products/show/' . htmlspecialchars($product->slug ?? $product->id); ?>" class="product-card-link">
-                                <div class="product-card-image-wrapper">
-                                    <img src="<?php echo PRODUCT_IMG_URL_PREFIX . htmlspecialchars(!empty($product->image_path) ? $product->image_path : 'default_product.jpg'); ?>"
-                                        alt="<?php echo htmlspecialchars($product->name ?? 'Product'); ?>" class="product-card-img">
-                                </div>
-                                <div class="product-card-info">
-                                    <h4 class="product-name"><?php echo htmlspecialchars($product->name ?? 'Product Name'); ?></h4>
-                                    <p class="artisan-name">By: <?php echo htmlspecialchars($product->shop_name ?? $product->artisan_username ?? 'Unknown Artisan'); ?></p>
-                                    <p class="product-price">$<?php echo number_format($product->price ?? 0, 2); ?></p>
-                                </div>
-                            </a>
-                        </div>
-                    <?php endif; ?>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <p>No featured creations available right now. Check back soon!</p>
-            <?php endif; ?>
-        </div>
-    </section>
+    <?php if (isset($artOfTheWeek) && is_object($artOfTheWeek)): ?>
+        <section class="content-section">
+            <hr class="featured-line">
+            <h2 class="section-title">Featured Art of the week</h2>
+            <div class="week-featured-container">
+                <div class="week-featured-item">
+                    <a href="<?php echo URLROOT . '/products/show/' . htmlspecialchars($artOfTheWeek->slug ?? $artOfTheWeek->id); ?>" class="featured-art-image-link">
+                        <img src="<?php echo PRODUCT_IMG_URL_PREFIX . htmlspecialchars(!empty($artOfTheWeek->image_path) ? $artOfTheWeek->image_path : 'default_product.jpg'); ?>"
+                            alt="<?php echo htmlspecialchars($artOfTheWeek->name ?? 'Featured Artwork'); ?>" class="week-featured-img">
+                    </a>
+                    <div class="week-featured-text">
+                        <h3><?php echo htmlspecialchars($artOfTheWeek->name ?? 'Artwork Name'); ?></h3>
+                        <p>Type: <?php echo htmlspecialchars($artOfTheWeek->category_name ?? 'General Art'); ?></p>
+                        <p>By: <?php echo htmlspecialchars($artOfTheWeek->shop_name ?? $artOfTheWeek->artisan_username ?? 'Unknown Artisan'); ?></p>
+                        <a href="<?php echo URLROOT . '/products/show/' . htmlspecialchars($artOfTheWeek->slug ?? $artOfTheWeek->id); ?>" class="view-art-link">View Details</a>
+                    </div>
+                </div>
+        </section>
+    <?php endif; ?>
 
     <section class="content-section">
         <hr class="featured-line">

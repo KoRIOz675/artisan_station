@@ -23,7 +23,7 @@ class HomeController extends Controller
     {
         $allFeaturedArtisans = $this->userModel->getFeaturedArtisans();
         $featuredArtisan = null; // Initialize
-        $categories = $this->categoryModel->getAllCategories();
+        $featuredProducts = []; // Initialize
 
         // Select the first one found as 'Artisan of the Week'
         if (!empty($allFeaturedArtisans)) {
@@ -33,8 +33,8 @@ class HomeController extends Controller
 
         $upcomingEvents = $this->eventModel->getUpcomingActiveEvents(3);
         $featuredProducts = $this->productModel->getFeaturedActiveProducts(6);
-
-        echo "<script>console.log('Products received from model: " . count($featuredProducts) . " items.');</script>";
+        $artOfTheWeek = $this->productModel->getArtOfTheWeek();
+        $categories = $this->categoryModel->getAllCategories();
 
         // Prepare data for the view
         $data = [
@@ -42,12 +42,11 @@ class HomeController extends Controller
             'description' => 'For Artists, by Artists',
             'cssFile' => 'home.css',
             'featuredArtisan' => $featuredArtisan,
+            'artOfTheWeek' => $artOfTheWeek,
             'products' => $featuredProducts,
             'events' => $upcomingEvents,
             'categories' => $categories,
         ];
-
-        echo "<script>console.log('Data passed to view : " . $data['products'] . "');</script>";
 
         $this->view('home/index', $data);
     }

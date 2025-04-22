@@ -171,72 +171,68 @@
     color: #800000;
 }
 
-.featured-products-container {
-    display: grid; /* Use grid for easy wrapping */
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /* Responsive columns */
-    gap: 20px; /* Space between cards */
-    padding: 10px 0; /* Padding around the grid */
+.featured-art-section {
+    padding: 40px 20px;
+    margin-bottom: 30px;
 }
 
-.product-card-featured {
-    border: 1px solid #e0e0e0;
-    border-radius: 5px;
-    background-color: #fff;
-    overflow: hidden; /* Clip image if needed */
-    transition: box-shadow 0.3s ease;
-    text-align: center; /* Center text below image */
+.section-title.featured-art-title {
+    font-size: 1.8em;
+    color: #8B4513;
+    margin-bottom: 5px;
+    text-align: left;
+    font-weight: normal;
 }
 
-.product-card-featured:hover {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.featured-art-container {
+    display: flex;
+    flex-wrap: wrap; /* Wrap on smaller screens */
+    gap: 30px; /* Space between image and details */
+    align-items: center; /* Vertically align items */
 }
 
-.product-card-featured .product-card-link {
-    text-decoration: none;
-    color: inherit;
-    display: block; /* Make link fill the card */
-}
-
-.product-card-featured .product-card-image-wrapper {
-     width: 100%;
-     height: 180px; /* Adjust height as desired */
-     background-color: #f0f0f0; /* Placeholder bg */
-     display: flex;
-     justify-content: center;
-     align-items: center;
-}
-
-.product-card-featured .product-card-img {
+.featured-art-image-link {
     display: block;
-    max-width: 100%;
-    max-height: 100%; /* Fit within wrapper */
-    width: auto;
-    height: auto;
-    object-fit: cover; /* Or 'contain' depending on image aspect ratios */
+    flex-shrink: 0; /* Prevent image shrinking too much */
 }
 
-.product-card-featured .product-card-info {
-    padding: 15px 10px;
+.featured-art-img {
+    width: 250px; /* Adjust size as needed */
+    height: 250px;
+    object-fit: cover;
+    border: 1px solid #ddd; /* Optional */
+    border-radius: 4px; /* Optional */
 }
 
-.product-card-featured .product-name {
+.featured-art-details {
+    flex-grow: 1; /* Take remaining space */
+    text-align: left;
+    color: #5D4037; /* Brown text color */
+}
+
+.featured-art-details .art-name {
+    font-size: 1.8em;
+    margin-top: 0;
+    margin-bottom: 8px;
+    font-weight: normal;
+}
+
+.featured-art-details .art-type,
+.featured-art-details .art-artist {
     font-size: 1.1em;
-    margin: 0 0 5px 0;
-    font-weight: bold;
-    color: #333;
+    margin: 4px 0;
+    color: #795548; /* Lighter brown */
 }
 
-.product-card-featured .artisan-name {
-    font-size: 0.9em;
-    color: #777;
-    margin: 0 0 8px 0;
-}
-
-.product-card-featured .product-price {
-    font-size: 1.1em;
+.featured-art-details .view-art-link {
+    display: inline-block;
+    margin-top: 15px;
+    color: #8B4513;
+    text-decoration: none;
     font-weight: bold;
-    color: #8B4513; /* Brownish price */
-    margin: 0;
+}
+.featured-art-details .view-art-link:hover {
+    text-decoration: underline;
 }
 
 .categories-container {

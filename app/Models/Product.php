@@ -124,7 +124,6 @@ class Product
 
     public function getFilteredActiveProducts(array $filters = [])
     {
-        // Base query - select product info and join category/user info
         $sql = "SELECT
                     p.id, p.name, p.slug, p.description, p.price, p.image_path, p.created_at,
                     c.name as category_name, c.slug as category_slug,
@@ -203,18 +202,33 @@ class Product
                 $this->db->bind(':limit', $limit, PDO::PARAM_INT);
             }
 
-            $results = $this->db->resultSet();
-
-            echo "<script>console.log('--- Product::getFeaturedActiveProducts ---');</script>";
-            echo "<script>console.log('SQL Executed: " . $sql . "');</script>";
-            echo "<script>console.log('Limit Used: " . print_r($limit, true) . "');</script>";
-            echo "<script>console.log('Raw Result Count: " . count($results) . "');</script>";
-            echo "<script>console.log('--- End Product::getFeaturedActiveProducts ---');</script>";
-
             return $this->db->resultSet();
         } catch (Exception $e) {
             error_log("Error fetching featured active products: " . $e->getMessage());
             return [];
+        }
+    }
+
+    public function getArtOfTheWeek()
+    {
+        // Select fields needed for the specific display
+        $sql = "SELECT
+                    p.id, p.name, p.slug, p.price, p.image_path,
+                    c.name as category_name,
+                    u.username as artisan_username, u.shop_name
+                FROM products p
+                LEFT JOIN categories c ON p.category_id = c.id
+                LEFT JOIN users u ON p.artisan_id = u.id
+                WHERE p.is_active = 1 AND p.is_featured = 1
+                ORDER BY p.updated_at DESC -- Or created_at DESC, or a dedicated 'featured_on' date
+                LIMIT 1"; // Fetch only one
+
+        try {
+            $this->db->query($sql);
+            return $this->db->single(); // Fetch a single object
+        } catch (Exception $e) {
+            error_log("Error fetching Art of the Week: " . $e->getMessage());
+            return false;
         }
     }
 }
