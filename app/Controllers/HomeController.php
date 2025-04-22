@@ -1,6 +1,4 @@
 <?php
-// File: app/Controllers/HomeController.php
-
 class HomeController extends Controller
 {
 
@@ -25,35 +23,31 @@ class HomeController extends Controller
     {
         $allFeaturedArtisans = $this->userModel->getFeaturedArtisans();
         $featuredArtisan = null; // Initialize
-        $featuredArtisanProducts = []; // Initialize
         $categories = $this->categoryModel->getAllCategories();
 
         // Select the first one found as 'Artisan of the Week'
         if (!empty($allFeaturedArtisans)) {
-            $featuredArtisan = $allFeaturedArtisans[0]; // Get the first object
-
-            // Now fetch some products for this specific artisan (e.g., limit 5)
-            if ($featuredArtisan && isset($featuredArtisan->id)) {
-                $featuredArtisanProducts = $this->productModel->getActiveProductsByArtisanId($featuredArtisan->id, 5);
-            }
+            $featuredArtisan = $allFeaturedArtisans[0];
         }
         // --- End Handle Featured Artisan ---
 
-
-        $featuredProducts = []; // General featured products (placeholder)
         $upcomingEvents = $this->eventModel->getUpcomingActiveEvents(3);
+        $featuredProducts = $this->productModel->getFeaturedActiveProducts(6);
+
+        echo "<script>console.log('Products received from model: " . count($featuredProducts) . " items.');</script>";
 
         // Prepare data for the view
         $data = [
             'title' => 'Welcome to Artisan Station',
             'description' => 'For Artists, by Artists',
             'cssFile' => 'home.css',
-            'featuredArtisan' => $featuredArtisan,           // Pass the single featured artisan object (or null)
-            'featuredArtisanProducts' => $featuredArtisanProducts, // Pass their products
+            'featuredArtisan' => $featuredArtisan,
             'products' => $featuredProducts,
             'events' => $upcomingEvents,
             'categories' => $categories,
         ];
+
+        echo "<script>console.log('Data passed to view : " . $data['products'] . "');</script>";
 
         $this->view('home/index', $data);
     }

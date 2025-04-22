@@ -121,4 +121,100 @@ class Product
             return false;
         }
     }
+
+    public function getFilteredActiveProducts(array $filters = [])
+    {
+        // Base query - select product info and join category/user info
+        $sql = "SELECT
+                    p.id, p.name, p.slug, p.description, p.price, p.image_path, p.created_at,
+                    c.name as category_name, c.slug as category_slug,
+                    u.username as artisan_username, u.shop_name
+                FROM products p
+                LEFT JOIN categories c ON p.category_id = c.id
+                LEFT JOIN users u ON p.artisan_id = u.id
+                WHERE p.is_active = 1"; // Start with only active products
+
+        $bindings = []; // Array to hold PDO bindings
+
+        // --- Apply Category Filter ---
+        if (!empty($filters['category_id']) && filter_var($filters['category_id'], FILTER_VALIDATE_INT)) {
+            $sql .= " AND p.category_id = :category_id";
+            $bindings[':category_id'] = (int)$filters['category_id'];
+        }
+
+        // --- Apply Search Filter ---
+        if (!empty($filters['search_term'])) {
+            $searchTerm = '%' . trim($filters['search_term']) . '%'; // Add wildcards
+            // Search product name, description, category name, artisan username/shop name
+            $sql .= " AND (p.name LIKE :search_term
+                           OR p.description LIKE :search_term
+                           OR c.name LIKE :search_term
+                           OR u.username LIKE :search_term
+                           OR u.shop_name LIKE :search_term)";
+            $bindings[':search_term'] = $searchTerm;
+        }
+
+        // --- Ordering ---
+        $sql .= " ORDER BY p.created_at DESC"; // Default order
+
+        // --- Pagination  ---
+        if (isset($filters['limit']) && isset($filters['offset'])) {
+            $sql .= " LIMIT :limit OFFSET :offset";
+            $bindings[':limit'] = (int)$filters['limit'];
+            $bindings[':offset'] = (int)$filters['offset'];
+        }
+
+        try {
+            $this->db->query($sql);
+            // Bind all collected parameters
+            foreach ($bindings as $param => $value) {
+                // Determine type (simple version)
+                $type = is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR;
+                $this->db->bind($param, $value, $type);
+            }
+            return $this->db->resultSet();
+        } catch (Exception $e) {
+            error_log("Error fetching filtered products: " . $e->getMessage());
+            error_log("SQL: " . $sql);
+            error_log("Bindings: " . print_r($bindings, true));
+            return []; // Return empty on error
+        }
+    }
+
+    public function getFeaturedActiveProducts($limit = null)
+    {
+        // Select columns needed for display on homepage card
+        $sql = "SELECT
+                    p.id, p.name, p.slug, p.price, p.image_path,
+                    u.username as artisan_username, u.shop_name
+                FROM products p
+                LEFT JOIN users u ON p.artisan_id = u.id
+                WHERE p.is_active = 1 AND p.is_featured = 1
+                ORDER BY p.updated_at DESC"; // Order by most recently updated featured product
+
+        if ($limit !== null && is_int($limit) && $limit > 0) {
+            $sql .= " LIMIT :limit";
+        }
+
+        try {
+            $this->db->query($sql);
+
+            if ($limit !== null && is_int($limit) && $limit > 0) {
+                $this->db->bind(':limit', $limit, PDO::PARAM_INT);
+            }
+
+            $results = $this->db->resultSet();
+
+            echo "<script>console.log('--- Product::getFeaturedActiveProducts ---');</script>";
+            echo "<script>console.log('SQL Executed: " . $sql . "');</script>";
+            echo "<script>console.log('Limit Used: " . print_r($limit, true) . "');</script>";
+            echo "<script>console.log('Raw Result Count: " . count($results) . "');</script>";
+            echo "<script>console.log('--- End Product::getFeaturedActiveProducts ---');</script>";
+
+            return $this->db->resultSet();
+        } catch (Exception $e) {
+            error_log("Error fetching featured active products: " . $e->getMessage());
+            return [];
+        }
+    }
 }

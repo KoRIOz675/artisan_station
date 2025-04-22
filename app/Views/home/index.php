@@ -37,7 +37,7 @@
                                     </a>
                                 <?php endif; ?>
                             <?php endforeach; ?>
-                            <a href="<?php echo URLROOT . '/artisans/show/' . ($featuredArtisan->id ?? ''); ?>#artworks" class="artist-art-item see-more-art">
+                            <a href="<?php echo URLROOT . '/artisans/show/' . ($featuredArtisan->id ?? ''); ?>#artworks" class="see-more-art">
                                 <span>▶</span>
                             </a>
                         </div>
@@ -60,24 +60,27 @@
     <section class="content-section">
         <hr class="featured-line">
         <h2 class="section-title">Featured Creations</h2>
-        <div class="categories-container">
-            <?php // Check if $products exists and is not empty before looping 
-            ?>
+        <div class="featured-products-container">
             <?php if (isset($products) && !empty($products)): ?>
                 <?php foreach ($products as $product): ?>
-                    <div class="category-item" style="background-image: url('<?php echo URLROOT; ?>/img/products/<?php echo htmlspecialchars($product['image_path'] ?? 'default_product.jpg'); ?>');">
-                        <div class="category-item-text">
-                            <?php // Ensure product ID and name exist 
-                            ?>
-                            <a href="<?php echo URLROOT . '/products/show/' . ($product['id'] ?? ''); ?>"><?php echo htmlspecialchars($product['name'] ?? 'Product'); ?></a>
-                            <p>by <?php echo htmlspecialchars($product['artisan_name'] ?? 'Unknown Artisan'); ?></p>
+                    <?php if (is_object($product)): ?>
+                        <div class="product-card-featured">
+                            <a href="<?php echo URLROOT . '/products/show/' . htmlspecialchars($product->slug ?? $product->id); ?>" class="product-card-link">
+                                <div class="product-card-image-wrapper">
+                                    <img src="<?php echo PRODUCT_IMG_URL_PREFIX . htmlspecialchars(!empty($product->image_path) ? $product->image_path : 'default_product.jpg'); ?>"
+                                        alt="<?php echo htmlspecialchars($product->name ?? 'Product'); ?>" class="product-card-img">
+                                </div>
+                                <div class="product-card-info">
+                                    <h4 class="product-name"><?php echo htmlspecialchars($product->name ?? 'Product Name'); ?></h4>
+                                    <p class="artisan-name">By: <?php echo htmlspecialchars($product->shop_name ?? $product->artisan_username ?? 'Unknown Artisan'); ?></p>
+                                    <p class="product-price">$<?php echo number_format($product->price ?? 0, 2); ?></p>
+                                </div>
+                            </a>
                         </div>
-                    </div>
+                    <?php endif; ?>
                 <?php endforeach; ?>
             <?php else: ?>
-                <?php // Placeholder if no product data is passed 
-                ?>
-                <p>Featured products section - requires data from controller/model.</p>
+                <p>No featured creations available right now. Check back soon!</p>
             <?php endif; ?>
         </div>
     </section>

@@ -207,7 +207,4 @@ class ProductsController extends Controller
             $this->view('products/create_product', $data);
         }
     }
-
-    // --- Add edit(), update(), destroy() methods similarly ---
-    // Remember to check ownership: $_SESSION['user_id'] == $product['artisan_id']
 }

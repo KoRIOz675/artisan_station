@@ -111,39 +111,132 @@
 
 .week-featured-art-gallery {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: row;
+  min-width: 300px;
+  /* justify-content: center; */
+  align-items: flex-start;
+  flex-direction: column;
   margin: 2em;
 }
 
 .gallery-title {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: row;
+  display: block;
   margin: 1em;
   font-size: 2em;
   color: #800000;
 }
 
 .artist-art-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(15em, 1fr));
-  gap: 1em;
-  justify-content: center;
-  align-items: center;
-  margin: 2em;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  width: 100%;
 }
 
 .artist-art-item {
-  width: 10em;
-  height: 10em;
-  object-fit: cover;
-  object-position: center;
-  border-radius: 1em;
-  margin-left: 2em;
-  margin-right: 2em;
+  display: block;
+    width: 150px;
+    height: 150px;
+    flex-shrink: 0;
+    background-color: #e0e0e0;
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid #ddd;
+}
+
+.artist-art-item img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.artist-art-item:hover img {
+    transform: scale(1.1);
+}
+
+.see-more-art {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.see-more-art span {
+    font-size: 2em;
+    color: #800000;
+}
+
+.featured-products-container {
+    display: grid; /* Use grid for easy wrapping */
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /* Responsive columns */
+    gap: 20px; /* Space between cards */
+    padding: 10px 0; /* Padding around the grid */
+}
+
+.product-card-featured {
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    background-color: #fff;
+    overflow: hidden; /* Clip image if needed */
+    transition: box-shadow 0.3s ease;
+    text-align: center; /* Center text below image */
+}
+
+.product-card-featured:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.product-card-featured .product-card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block; /* Make link fill the card */
+}
+
+.product-card-featured .product-card-image-wrapper {
+     width: 100%;
+     height: 180px; /* Adjust height as desired */
+     background-color: #f0f0f0; /* Placeholder bg */
+     display: flex;
+     justify-content: center;
+     align-items: center;
+}
+
+.product-card-featured .product-card-img {
+    display: block;
+    max-width: 100%;
+    max-height: 100%; /* Fit within wrapper */
+    width: auto;
+    height: auto;
+    object-fit: cover; /* Or 'contain' depending on image aspect ratios */
+}
+
+.product-card-featured .product-card-info {
+    padding: 15px 10px;
+}
+
+.product-card-featured .product-name {
+    font-size: 1.1em;
+    margin: 0 0 5px 0;
+    font-weight: bold;
+    color: #333;
+}
+
+.product-card-featured .artisan-name {
+    font-size: 0.9em;
+    color: #777;
+    margin: 0 0 8px 0;
+}
+
+.product-card-featured .product-price {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #8B4513; /* Brownish price */
+    margin: 0;
 }
 
 .categories-container {
