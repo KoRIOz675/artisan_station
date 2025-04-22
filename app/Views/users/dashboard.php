@@ -11,8 +11,6 @@
                 <li><a href="#art-content" class="dashboard-tab">My Art</a></li>
                 <li><a href="#event-created" class="dashboard-tab">My Events</a></li>
             <?php endif; ?>
-            <?php // Show 'Admin' tab only for admins (Example) 
-            ?>
             <?php if (isset($data['role']) && $data['role'] === 'admin'): ?>
                 <li><a href="<?php echo URLROOT; ?>/admin/dashboard">Admin Section</a></li>
             <?php endif; ?>
@@ -103,16 +101,8 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>#12345</td>
-                            <td>2023-10-26 10:00</td>
-                            <td>$45.50</td>
-                            <td>Delivered</td>
-                            <td><a href="#">View Details</a></td>
-                        </tr>
                     </tbody>
                 </table>
-                <p><i>(Placeholder data shown)</i></p>
             <?php endif; ?>
         </div>
 
@@ -154,15 +144,8 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>Art Festival 2023</td>
-                            <td>2023-09-15</td>
-                            <td>City Park</td>
-                            <td><a href="#">View Event</a></td>
-                        </tr>
                     </tbody>
                 </table>
-                <p><i>(Placeholder data shown - requires linking users to events)</i></p>
             <?php endif; ?>
         </div>
 
@@ -173,8 +156,7 @@
             <div id="art-content" class="tab-pane">
                 <h2>My Art Management</h2>
 
-                <a href="<?php echo URLROOT; ?>/products/create" class="btn btn-primary">Upload New Art</a> <?php // Link to create form 
-                                                                                                            ?>
+                <a href="<?php echo URLROOT; ?>/products/create" class="btn btn-primary">Upload New Art</a>
 
                 <h3>My Listed Arts</h3>
                 <?php if (!empty($data['arts'])): ?>
@@ -191,23 +173,6 @@
                     </div>
                 <?php else: ?>
                     <p>You haven't uploaded any art pieces yet.</p>
-                    <?php // Placeholder Grid for structure demonstration 
-                    ?>
-                    <div class="arts-grid">
-                        <div class="art-card">
-                            <img src="<?php echo URLROOT . '/img/categories/Painting.jpg'; ?>" alt="Placeholder Art">
-                            <h4>Example Painting</h4>
-                            <p>$150.00</p>
-                            <a href="#">Edit</a> | <a href="#" target="_blank">View</a>
-                        </div>
-                        <div class="art-card">
-                            <img src="<?php echo URLROOT . '/img/categories/Sculpting.jpg'; ?>" alt="Placeholder Art">
-                            <h4>Example Sculpture</h4>
-                            <p>$275.00</p>
-                            <a href="#">Edit</a> | <a href="#" target="_blank">View</a>
-                        </div>
-                    </div>
-                    <p><i>(Placeholder data shown)</i></p>
                 <?php endif; ?>
             </div>
 

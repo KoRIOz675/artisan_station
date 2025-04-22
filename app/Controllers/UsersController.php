@@ -5,12 +5,14 @@ class UsersController extends Controller
 
     private $usersModel;
     private $eventModel;
+    private $productModel;
 
     public function __construct()
     {
         $this->usersModel = $this->model('Users');
         $this->eventModel = $this->model('Event');
-        if (!$this->usersModel) {
+        $this->productModel = $this->model('Product');
+        if (!$this->usersModel || !$this->eventModel || !$this->productModel) {
             die("Error: Could not load required resources.");
         }
     }
@@ -269,19 +271,16 @@ class UsersController extends Controller
         $data['events'] = [];
         $data['arts'] = [];
 
-        // TODO: Fetch actual data from models based on user ID/role
-        // if ($data['role'] === 'customer' || $data['role'] === 'admin') {
-           // $orderModel = $this->model('Order');
-           // $data['orders'] = $orderModel->getOrdersByCustomerId($_SESSION['user_id']);
-           // $eventModel = $this->model('Event');
-           // $data['events'] = $eventModel->getEventsAttendedByUserId($_SESSION['user_id']); // Needs model method
-        // }
         if ($data['role'] === 'artisan') {
             $data['my_events'] = $this->eventModel->getEventsByArtisanId($_SESSION['user_id']);
-        //    $productModel = $this->model('Product');
-        //    $data['arts'] = $productModel->getProductsByArtisanId($_SESSION['user_id']);
+
+            // --- ADD THIS BLOCK TO FETCH PRODUCTS ---
+            // Fetch active products created BY this artisan
+            // Use the method already present in your Product model
+            $data['arts'] = $this->productModel->getActiveProductsByArtisanId($_SESSION['user_id']);
+
+            $this->view('/users/dashboard', $data); // Ensure you have this view file
         }
-        $this->view('/users/dashboard', $data); // Ensure you have this view file
     }
 
     public function profile()
@@ -322,15 +321,16 @@ class UsersController extends Controller
         $this->view('/admin/manage_users', data: $data);
     }
 
-    public function editProfile() {
+    public function editProfile()
+    {
         if (!isset($_SESSION['user_id'])) {
             $this->redirect('users/loginRegister');
             return;
         }
 
-        $userId = $_SESSION['user_id']; 
+        $userId = $_SESSION['user_id'];
 
-         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             // Sanitize inputs individually
             $newUsername = trim(filter_input(INPUT_POST, 'username', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
             $newEmail = trim(filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL));
@@ -341,38 +341,38 @@ class UsersController extends Controller
             $newShopName = null;
             if ($_SESSION['user_role'] === 'artisan') {
                 $newBio = trim(filter_input(INPUT_POST, 'bio', FILTER_SANITIZE_FULL_SPECIAL_CHARS)); // Adjust filter if needed
-                 $newShopName = trim(filter_input(INPUT_POST, 'shop_name', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
+                $newShopName = trim(filter_input(INPUT_POST, 'shop_name', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
             }
 
 
             // Fetch current user data for comparison (needed for unique checks)
             $currentUser = $this->usersModel->getUserById($userId);
             if (!$currentUser) {
-                 // Should not happen if logged in, but handle defensively
-                 // flash('error', 'Could not retrieve your user data.', 'alert alert-danger');
-                 $this->redirect('users/dashboard');
-                 return;
+                // Should not happen if logged in, but handle defensively
+                // flash('error', 'Could not retrieve your user data.', 'alert alert-danger');
+                $this->redirect('users/dashboard');
+                return;
             }
 
             // Prepare data array for validation and potential view reload
-             $data = [
+            $data = [
                 'title' => 'Edit Profile',
                 'cssFile' => 'edit-profile.css', // Optional specific CSS
                 'user' => $currentUser, // Pass current data back to view immediately
-                 // Submitted values (used for repopulating form on error)
+                // Submitted values (used for repopulating form on error)
                 'username' => $newUsername,
                 'email' => $newEmail,
                 'first_name' => $newFirstName,
                 'last_name' => $newLastName,
                 'bio' => $newBio,
                 'shop_name' => $newShopName,
-                 // Error messages
-                 'username_err' => '',
-                 'email_err' => '',
-                 'first_name_err' => '', // Add if making required
-                 'last_name_err' => '',  // Add if making required
-                 'shop_name_err' => '', // Add if making required for artisans
-                 'general_err' => ''
+                // Error messages
+                'username_err' => '',
+                'email_err' => '',
+                'first_name_err' => '', // Add if making required
+                'last_name_err' => '',  // Add if making required
+                'shop_name_err' => '', // Add if making required for artisans
+                'general_err' => ''
             ];
 
 
@@ -381,7 +381,7 @@ class UsersController extends Controller
             if (empty($newUsername)) {
                 $data['username_err'] = 'Please enter username.';
             } elseif ($newUsername !== $currentUser->username && $this->usersModel->findUserByUsername($newUsername)) {
-                 // Check if username changed AND if the new one is taken by SOMEONE ELSE
+                // Check if username changed AND if the new one is taken by SOMEONE ELSE
                 $data['username_err'] = 'Username is already taken.';
             }
 
@@ -391,13 +391,13 @@ class UsersController extends Controller
             } elseif (!filter_var($newEmail, FILTER_VALIDATE_EMAIL)) {
                 $data['email_err'] = 'Please enter a valid email format.';
             } elseif ($newEmail !== $currentUser->email && $this->usersModel->findUserByEmail($newEmail)) {
-                 // Check if email changed AND if the new one is taken by SOMEONE ELSE
-                 $data['email_err'] = 'Email is already registered by another user.';
-             }
+                // Check if email changed AND if the new one is taken by SOMEONE ELSE
+                $data['email_err'] = 'Email is already registered by another user.';
+            }
 
             // Add validation for first_name, last_name, shop_name if they become required
 
-             // --- If No Errors, Proceed with Update ---
+            // --- If No Errors, Proceed with Update ---
             if (empty($data['username_err']) && empty($data['email_err']) /* && other errors empty */) {
 
                 // Prepare data for the model update method
@@ -408,10 +408,10 @@ class UsersController extends Controller
                     'first_name' => $newFirstName,
                     'last_name' => $newLastName,
                 ];
-                 // Add artisan fields only if user is artisan
+                // Add artisan fields only if user is artisan
                 if ($_SESSION['user_role'] === 'artisan') {
-                     $updateData['bio'] = $newBio;
-                     $updateData['shop_name'] = $newShopName;
+                    $updateData['bio'] = $newBio;
+                    $updateData['shop_name'] = $newShopName;
                 }
 
                 // Attempt to update profile via model
@@ -428,18 +428,17 @@ class UsersController extends Controller
                     $this->redirect('users/dashboard'); // Redirect back to dashboard
                     return;
                 } else {
-                     // flash('profile_update_error', 'Failed to update profile. Please try again.', 'alert alert-danger');
-                     $data['general_err'] = 'Failed to update profile. Please try again.';
-                     // Reload the view with the error
-                      $this->view('users/edit_profile', $data);
+                    // flash('profile_update_error', 'Failed to update profile. Please try again.', 'alert alert-danger');
+                    $data['general_err'] = 'Failed to update profile. Please try again.';
+                    // Reload the view with the error
+                    $this->view('users/edit_profile', $data);
                 }
-
             } else {
                 // Validation errors occurred, reload the form with errors and submitted data
                 $this->view('users/edit_profile', $data);
             }
 
-        // --- Handle GET Request (Display Form) ---
+            // --- Handle GET Request (Display Form) ---
         } else {
             // Fetch current user data
             $user = $this->usersModel->getUserById($userId);
@@ -454,7 +453,7 @@ class UsersController extends Controller
             // Prepare data for the view
             $data = [
                 'title' => 'Edit Profile',
-                 'cssFile' => 'edit-profile.css', // Optional specific CSS
+                'cssFile' => 'edit-profile.css', // Optional specific CSS
                 // Pre-fill form fields with current data
                 'username' => $user->username,
                 'email' => $user->email,
@@ -476,8 +475,9 @@ class UsersController extends Controller
         }
     }
 
-    public function changePassword() {
-// 1. Ensure user is logged in
+    public function changePassword()
+    {
+        // 1. Ensure user is logged in
         if (!isset($_SESSION['user_id'])) {
             // flash('login_required', 'Please log in to change your password.', 'alert alert-warning');
             $this->redirect('users/loginRegister');
@@ -523,35 +523,36 @@ class UsersController extends Controller
             // --- If Validation Passes, Attempt Update ---
             if (empty($data['current_password_err']) && empty($data['new_password_err']) && empty($data['confirm_new_password_err'])) {
 
-                 // Call the PLAIN TEXT update model method
+                // Call the PLAIN TEXT update model method
                 $updateResult = $this->usersModel->updatePasswordPlain($userId, $currentPassword, $newPassword);
 
                 if ($updateResult === true) {
                     // Success!
-                     $data['success_message'] = 'Your password has been updated successfully!';
-                     // Reload view with success message
-                     $this->view('users/change_password', $data);
-                     return; // Stop execution
+                    $data['success_message'] = 'Your password has been updated successfully!';
+                    // Reload view with success message
+                    $this->view('users/change_password', $data);
+                    return; // Stop execution
                 } elseif ($updateResult === 'current_password_incorrect') {
-                     $data['current_password_err'] = 'Your current password is incorrect.';
+                    $data['current_password_err'] = 'Your current password is incorrect.';
                 } elseif ($updateResult === 'user_not_found') {
-                     $data['general_err'] = 'Could not find user account.'; // Should not happen
+                    $data['general_err'] = 'Could not find user account.'; // Should not happen
                 } else { // Includes 'db_error'
-                     $data['general_err'] = 'Could not update password due to a server error. Please try again.';
+                    $data['general_err'] = 'Could not update password due to a server error. Please try again.';
                 }
                 // If errors occurred, fall through to reload view with errors
             }
-             // Reload the view with errors if validation failed or update failed
-              $this->view('users/change_password', $data);
+            // Reload the view with errors if validation failed or update failed
+            $this->view('users/change_password', $data);
 
-        // --- Handle GET Request (Display Form) ---
+            // --- Handle GET Request (Display Form) ---
         } else {
             // Just load the view with the empty form
             $this->view('users/change_password', $data);
         }
     }
 
-    public function deleteAccount() {
+    public function deleteAccount()
+    {
         // 1. Ensure user is logged in
         if (!isset($_SESSION['user_id'])) {
             // Should not be reachable if triggered from dashboard, but double-check

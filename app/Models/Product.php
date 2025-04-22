@@ -9,18 +9,6 @@ class Product
         $this->db = Database::getInstance();
     }
 
-    // Get all products (consider pagination for real app)
-    public function getProducts()
-    {
-        // Join with users table to get artisan name
-        $this->db->query('SELECT p.*, u.name as artisan_name, u.shop_name
-                          FROM products p
-                          JOIN users u ON p.artisan_id = u.id
-                          WHERE u.role = "artisan"
-                          ORDER BY p.created_at DESC');
-        return $this->db->resultSet();
-    }
-
     // Get product by ID
     public function getProductById($id)
     {
@@ -30,73 +18,6 @@ class Product
                           WHERE p.id = :id');
         $this->db->bind(':id', $id);
         return $this->db->single();
-    }
-
-    // Get products by Artisan ID
-    public function getProductsByArtisan($artisan_id)
-    {
-        $this->db->query('SELECT * FROM products WHERE artisan_id = :artisan_id ORDER BY created_at DESC');
-        $this->db->bind(':artisan_id', $artisan_id);
-        return $this->db->resultSet();
-    }
-
-    // Add a new product
-    public function addProduct($data)
-    {
-        // Add validation and ensure user is an artisan and owns this product
-        $this->db->query('INSERT INTO products (artisan_id, name, description, price, materials, dimensions, production_time, image_path, category_id)
-                          VALUES (:artisan_id, :name, :description, :price, :materials, :dimensions, :production_time, :image_path, :category_id)');
-        $this->db->bind(':artisan_id', $data['artisan_id']); // Should come from logged-in user session
-        $this->db->bind(':name', $data['name']);
-        $this->db->bind(':description', $data['description']);
-        $this->db->bind(':price', $data['price']);
-        $this->db->bind(':materials', $data['materials'] ?? null);
-        $this->db->bind(':dimensions', $data['dimensions'] ?? null);
-        $this->db->bind(':production_time', $data['production_time'] ?? null);
-        $this->db->bind(':image_path', $data['image_path'] ?? 'default_product.jpg'); // Handle image uploads properly
-        $this->db->bind(':category_id', $data['category_id'] ?? null);
-
-        return $this->db->execute();
-    }
-
-    // Update a product
-    public function updateProduct($id, $data)
-    {
-        // Add validation and authorization (is user the owner?)
-        $this->db->query('UPDATE products SET
-                            name = :name,
-                            description = :description,
-                            price = :price,
-                            materials = :materials,
-                            dimensions = :dimensions,
-                            production_time = :production_time,
-                            image_path = :image_path,
-                            category_id = :category_id
-                          WHERE id = :id AND artisan_id = :artisan_id'); // Ensure artisan owns the product
-
-        $this->db->bind(':id', $id);
-        $this->db->bind(':artisan_id', $data['artisan_id']); // From session
-        $this->db->bind(':name', $data['name']);
-        $this->db->bind(':description', $data['description']);
-        $this->db->bind(':price', $data['price']);
-        $this->db->bind(':materials', $data['materials'] ?? null);
-        $this->db->bind(':dimensions', $data['dimensions'] ?? null);
-        $this->db->bind(':production_time', $data['production_time'] ?? null);
-        $this->db->bind(':image_path', $data['image_path'] ?? 'default_product.jpg');
-        $this->db->bind(':category_id', $data['category_id'] ?? null);
-
-        return $this->db->execute();
-    }
-
-    // Delete a product
-    public function deleteProduct($id, $artisan_id)
-    {
-        // Add validation and authorization
-        $this->db->query('DELETE FROM products WHERE id = :id AND artisan_id = :artisan_id');
-        $this->db->bind(':id', $id);
-        $this->db->bind(':artisan_id', $artisan_id); // From session
-
-        return $this->db->execute();
     }
 
     // Get total number of products
@@ -152,5 +73,52 @@ class Product
         }
 
         return $this->db->resultSet();
+    }
+
+    public function createProduct($data)
+    {
+        // Basic slug generation (consider a library for robustness)
+        $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $data['name']), '-'));
+        $originalSlug = $slug;
+        $counter = 1;
+        while ($this->findProductBySlug($slug)) { // Use helper to ensure unique slug
+            $slug = $originalSlug . '-' . $counter++;
+        }
+
+        try {
+            // Query matches your schema columns: stock_quantity, is_active, is_featured
+            $this->db->query('INSERT INTO products (artisan_id, category_id, name, slug, description, price, image_path, stock_quantity, is_active, is_featured)
+                              VALUES (:artisan_id, :category_id, :name, :slug, :description, :price, :image_path, :stock_quantity, :is_active, :is_featured)');
+
+            $this->db->bind(':artisan_id', $data['artisan_id'], PDO::PARAM_INT);
+            $this->db->bind(':category_id', $data['category_id'], PDO::PARAM_INT);
+            $this->db->bind(':name', $data['name']);
+            $this->db->bind(':slug', $slug); // Use generated slug
+            $this->db->bind(':description', $data['description']);
+            $this->db->bind(':price', $data['price']); // Assumes price is correctly formatted number
+            $this->db->bind(':image_path', $data['image_path']); // Filename from controller
+            $this->db->bind(':stock_quantity', $data['stock_quantity'] ?? 0, PDO::PARAM_INT);
+            $this->db->bind(':is_active', $data['is_active'] ?? 1, PDO::PARAM_INT); // Default to active
+            $this->db->bind(':is_featured', $data['is_featured'] ?? 0, PDO::PARAM_INT); // Default to not featured
+
+            return $this->db->execute();
+        } catch (Exception $e) {
+            error_log("Error creating product: " . $e->getMessage());
+            error_log("Product Data: " . print_r($data, true));
+            return false;
+        }
+    }
+
+    public function findProductBySlug($slug)
+    {
+        try {
+            $this->db->query('SELECT id FROM products WHERE slug = :slug LIMIT 1');
+            $this->db->bind(':slug', $slug);
+            $this->db->execute();
+            return $this->db->rowCount() > 0;
+        } catch (Exception $e) {
+            error_log("Error finding product by slug ($slug): " . $e->getMessage());
+            return false;
+        }
     }
 }

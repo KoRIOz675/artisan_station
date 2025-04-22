@@ -29,8 +29,7 @@ spl_autoload_register(function ($className) {
         if (file_exists($file)) {
             require_once $file;
             return; // Stop searching once found
-        }
-        else {
+        } else {
             // Optional: Log or handle the error if needed
             error_log("Autoloader Error: Class file not found at " . $file);
             // echo "<script>console.log('Autoloader Error: Class file not found at " . $file . "');</script>";
@@ -63,20 +62,19 @@ if (!empty($urlParts[0])) {
 
     // Debug
     echo "<script>console.log('URL Part 0: " . ($urlParts[0] ?? 'null') . "');</script>";
+    echo "<script>console.log('Potential Controller: " . $potentialController . "');</script>";
+    echo "<script>console.log('Controller Path: " . $controllerPath . "');</script>";
 
     if (file_exists($controllerPath)) {
         $controllerName = $potentialController;
         echo "<script>console.log('Controller Found! Switched to: " . $controllerName . "');</script>";
         unset($urlParts[0]); // Remove controller part from URL parts
     } else {
-        // Optional: If the first part doesn't match a controller, maybe treat it as a parameter
-        // for the default controller, or show a 404. For now, we stick to default.
-         error_log("Routing Error: Controller file not found at " . $controllerPath);
-         echo "<script>console.log('Controller file NOT found. Staying with default: " . $controllerName . "');</script>";
-         // Consider implementing a dedicated 404 handler here
+        echo "<script>console.log('Controller file NOT found. Staying with default: " . $controllerName . "');</script>";
+        // Consider implementing a dedicated 404 handler here
     }
-}else {
-     echo "<script>console.log('No URL parts for controller. Using default: " . $controllerName . "');</script>"; // Added log for homepage case
+} else {
+    echo "<script>console.log('No URL parts for controller. Using default: " . $controllerName . "');</script>"; // Added log for homepage case
 }
 
 // --- Instantiate Controller ---
@@ -116,12 +114,9 @@ try {
     // Example: call $userControllerInstance->loginRegister() with $params=[]
     // Example: call $productControllerInstance->show() with $params=['product-slug']
     call_user_func_array([$controllerInstance, $methodName], $params);
-
 } catch (Exception $e) {
     // Basic exception handling (replace with proper logging/error pages)
     echo "An application error occurred: " . $e->getMessage();
     error_log("Dispatch Error: " . $e->getMessage() . "\n" . $e->getTraceAsString());
     // Show a user-friendly error page in production
 }
-
-?>
