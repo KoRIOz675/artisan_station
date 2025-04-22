@@ -4,9 +4,10 @@
 class HomeController extends Controller
 {
 
-    private $productModel; // Declare properties
-    private $userModel;    // Use userModel consistently
+    private $productModel; // Declare productModel
+    private $userModel;    // Declare userModel
     private $eventModel;    // Declare eventModel
+    private $categoryModel; // Declare categoryModel
 
     public function __construct()
     {
@@ -14,6 +15,10 @@ class HomeController extends Controller
         $this->productModel = $this->model('Product');
         $this->userModel = $this->model('Users');
         $this->eventModel = $this->model('Event');
+        $this->categoryModel = $this->model('Category');
+        if (!$this->productModel || !$this->userModel || !$this->eventModel || !$this->categoryModel) {
+            die("Error loading core models.");
+        }
     }
 
     public function index()
@@ -21,6 +26,7 @@ class HomeController extends Controller
         $allFeaturedArtisans = $this->userModel->getFeaturedArtisans();
         $featuredArtisan = null; // Initialize
         $featuredArtisanProducts = []; // Initialize
+        $categories = $this->categoryModel->getAllCategories();
 
         // Select the first one found as 'Artisan of the Week'
         if (!empty($allFeaturedArtisans)) {
@@ -46,7 +52,7 @@ class HomeController extends Controller
             'featuredArtisanProducts' => $featuredArtisanProducts, // Pass their products
             'products' => $featuredProducts,
             'events' => $upcomingEvents,
-            // 'artisans' => $allFeaturedArtisans, // We might not need ALL featured artisans anymore unless displayed elsewhere
+            'categories' => $categories,
         ];
 
         $this->view('home/index', $data);

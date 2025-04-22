@@ -86,16 +86,25 @@
         <hr class="featured-line">
         <h2 class="section-title">Explore Categories</h2>
         <div class="categories-container">
-            <!-- Static or dynamic categories - Use URLROOT -->
-            <a href="<?php echo URLROOT; ?>/products?category=woodworking" class="category-item" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('<?php echo URLROOT; ?>/img/categories/Woodworking.jpg');">
-                <div class="category-item-text">Woodworking</div>
-            </a>
-            <a href="<?php echo URLROOT; ?>/products?category=painting" class="category-item" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('<?php echo URLROOT; ?>/img/categories/Painting.jpg');">
-                <div class="category-item-text">Painting</div>
-            </a>
-            <a href="<?php echo URLROOT; ?>/products?category=pottery" class="category-item" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('<?php echo URLROOT; ?>/img/categories/Pottery.jpg');">
-                <div class="category-item-text">Pottery</div>
-            </a>
+            <?php if (isset($categories) && !empty($categories)): ?>
+                <?php foreach ($categories as $category): ?>
+                    <?php if (is_object($category)): ?>
+                        <?php
+                        // Determine background image path (use default if empty)
+                        $bgImage = !empty($category->image_path)
+                            ? CATEGORY_IMG_URL_PREFIX . htmlspecialchars($category->image_path) // Use constant if defined
+                            : URLROOT . '/img/categories/default_category.png'; // Provide a default
+                        $categoryLink = URLROOT . '/marketplace/category/' . htmlspecialchars($category->slug ?? $category->id);
+                        ?>
+                        <a href="<?php echo $categoryLink; ?>" class="category-item"
+                            style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('<?php echo $bgImage; ?>');">
+                            <div class="category-item-text"><?php echo htmlspecialchars($category->name ?? 'Category'); ?></div>
+                        </a>
+                    <?php endif; ?>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <p>No categories available at the moment.</p>
+            <?php endif; ?>
         </div>
     </section>
 

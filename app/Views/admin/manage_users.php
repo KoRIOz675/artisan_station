@@ -4,8 +4,6 @@
 
 <div class="container admin-container" style="padding: 20px;">
     <h2>Manage Users</h2>
-    <?php // flash('success'); flash('error'); 
-    ?>
 
     <table class="dashboard-table" style="width: 100%; border-collapse: collapse; margin: 20px 0; border: 1px solid #dee2e6; background-color: #f0f0f0;">
         <thead>

@@ -7,17 +7,17 @@
 
     <!-- Stats/Summary Boxes (Example) -->
     <div class="admin-stats" style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 30px;">
-        <div class="stat-box" style="flex: 1; min-width: 150px; background-color: #e9ecef; padding: 15px; border-radius: 5px; text-align: center;">
+        <div class="stat-box" style="flex: 1; min-width: 150px; background-color: #f8f9fa; padding: 15px; border-radius: 5px; text-align: center; border: 1px solid #dee2e6;">
             <h4>Total Users</h4>
             <p style="font-size: 1.5em; font-weight: bold;"><?php echo htmlspecialchars($data['userCount'] ?? '0'); ?></p>
             <a href="<?php echo URLROOT; ?>/admin/manageUsers" class="btn btn-primary" style="width: 10em;">Manage users</a>
         </div>
-        <div class="stat-box" style="flex: 1; min-width: 150px; background-color: #e9ecef; padding: 15px; border-radius: 5px; text-align: center;">
+        <div class="stat-box" style="flex: 1; min-width: 150px; background-color: #f8f9fa; padding: 15px; border-radius: 5px; text-align: center; border: 1px solid #dee2e6;">
             <h4>Total Products</h4>
             <p style="font-size: 1.5em; font-weight: bold;"><?php echo htmlspecialchars($data['productCount'] ?? '0'); ?></p>
             <a href="<?php echo URLROOT; ?>/admin/manageProducts" class="btn btn-primary" style="width: 10em;">Manage products</a>
         </div>
-        <div class="stat-box" style="flex: 1; min-width: 150px; background-color: #e9ecef; padding: 15px; border-radius: 5px; text-align: center;">
+        <div class="stat-box" style="flex: 1; min-width: 150px; background-color: #f8f9fa; padding: 15px; border-radius: 5px; text-align: center; border: 1px solid #dee2e6;">
             <h4>Pending Orders</h4>
             <p style="font-size: 1.5em; font-weight: bold;"><?php echo htmlspecialchars($data['pendingOrderCount'] ?? '0'); ?></p>
             <a href="<?php echo URLROOT; ?>/admin/manageOrders" class="btn btn-primary" style="width: 10em;">Manage order</a>
@@ -33,6 +33,7 @@
                 <li style="margin-bottom: 10px;"><a href="<?php echo URLROOT; ?>/admin/manageCategories" class="btn btn-primary" style="margin-right: 0.6em; width: 15em;">Manage Categories</a></li>
                 <li style="margin-bottom: 10px;"><a href="<?php echo URLROOT; ?>/admin/manageFeatured" class="btn btn-primary" style="margin-right: 0.6em; width: 15em;">Manage Featured Content</a></li>
                 <li style="margin-bottom: 10px;"><a href="<?php echo URLROOT; ?>/admin/siteSettings" class="btn btn-primary" style="margin-right: 0.6em; width: 15em;">Site Settings</a></li>
+                <li style="margin-bottom: 10px;"><a href="<?php echo URLROOT; ?>/admin/manageCategories" class="btn btn-primary" style="margin-right: 0.6em; width: 15em;">Manage Categories</a></li>
             </ul>
         </div>
         <div style="flex: 2; min-width: 300px;">

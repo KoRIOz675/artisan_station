@@ -242,11 +242,14 @@ class UsersController extends Controller
 
     public function dashboard()
     {
+        echo ("<script>console.log('UsersController: dashboard() called');</script>");
         if (!isset($_SESSION['user_id'])) {
             flash('login_required', 'You must be logged in to view that page.', 'alert alert-warning'); // Optional flash message
+            echo "<script>console.log('UsersController: dashboard() - login required');</script>";
             $this->redirect('/users/loginRegister');
             return;
         }
+        // die("Debug Point 1: Logged in check passed.");
 
         // If the code reaches here, the user IS logged in. Proceed with loading dashboard data.
         $data = [
@@ -265,6 +268,7 @@ class UsersController extends Controller
             'my_events' => [],
             'arts' => [],
         ];
+        // die("Debug Point 2: Base data array created.");
 
         // Pass data for orders, events, arts (initially empty or null)
         $data['orders'] = [];
@@ -278,9 +282,9 @@ class UsersController extends Controller
             // Fetch active products created BY this artisan
             // Use the method already present in your Product model
             $data['arts'] = $this->productModel->getActiveProductsByArtisanId($_SESSION['user_id']);
-
-            $this->view('/users/dashboard', $data); // Ensure you have this view file
         }
+
+        $this->view('users/dashboard', $data);
     }
 
     public function profile()
