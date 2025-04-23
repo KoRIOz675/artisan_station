@@ -9,7 +9,6 @@ define('CATEGORY_IMG_UPLOAD_DIR', dirname(__DIR__) . '/public/img/categories/');
 define('CATEGORY_IMG_URL_PREFIX', URLROOT . '/img/categories/');
 define('PROFILE_IMG_UPLOAD_DIR', dirname(__DIR__) . '/public/img/artists/');
 define('PROFILE_IMG_URL_PREFIX', URLROOT . '/img/artists/');
-define('CONTACT_FORM_RECIPIENT_EMAIL', 'thomas@mafille.net');
 
 if (!is_dir(EVENT_IMG_UPLOAD_DIR)) {
     mkdir(EVENT_IMG_UPLOAD_DIR, 0755, true);
