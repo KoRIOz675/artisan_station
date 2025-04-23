@@ -107,9 +107,9 @@ if (!$routeFound) {
             $potentialController = 'MarketplaceController';
         } elseif ($controllerSlug == 'artisans') {
             $potentialController = 'ArtisanController';
-        }
-        // Add other known controllers here...
-        else {
+        } elseif ($controllerSlug == 'contact') {
+            $potentialController = 'ContactController';
+        } else {
             // If slug doesn't match known controllers, maybe it's a 404
             // Or fallback to default if appropriate for your structure
             // For now, let it try generic - but this might fail if class name differs

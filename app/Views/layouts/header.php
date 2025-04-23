@@ -18,34 +18,30 @@
 <body>
     <header id="navbar">
         <a href="<?php echo URLROOT; ?>">
-            <img src="<?php echo URLROOT; ?>/img/logo.png" alt="Logo"> <?php // Add leading slash 
-                                                                        ?>
+            <img src="<?php echo URLROOT; ?>/img/logo.png" alt="Logo">
         </a>
         <nav>
             <a href="<?php echo URLROOT; ?>">Home</a>
             <span> | </span>
-            <a href="<?php echo URLROOT; ?>/marketplace">Marketplace</a> <?php // Add leading slash 
-                                                                            ?>
+            <a href="<?php echo URLROOT; ?>/marketplace">Marketplace</a>
             <span> | </span>
-            <a href="<?php echo URLROOT; ?>/contact">Contact</a> <?php // Add leading slash 
-                                                                    ?>
+            <a href="<?php echo URLROOT; ?>/contact">Contact</a>
             <span> | </span>
 
-            <form action="<?php echo URLROOT; ?>/search" method="GET"> <?php // Add leading slash 
-                                                                        ?>
+            <form action="<?php echo URLROOT; ?>/search" method="GET">
                 <input type="searchbar" name="query" class="fontAwesome" placeholder="Search..." aria-label="Search">
             </form>
         </nav>
         <div id="user-actions">
-            <?php if (isset($_SESSION['user_id'])): // User IS logged in 
+            <?php if (isset($_SESSION['user_id'])):
             ?>
                 <a href="<?php echo URLROOT; ?>/users/dashboard" class="user-icon" title="My Dashboard"><i class="fas fa-user"></i></a>
                 <a href="<?php echo URLROOT; ?>/users/logout" class="user-icon" title="Logout"><i class="fas fa-sign-out-alt"></i></a>
-            <?php else: // User IS NOT logged in 
+            <?php else:
             ?>
                 <a href="<?php echo URLROOT; ?>/users/loginRegister" class="user-icon" title="Login / Register"><i class="fas fa-user-plus"></i></a> <?php
                                                                                                                                                         ?>
             <?php endif; ?>
         </div>
     </header>
-    <main> <!-- Start main content wrapper -->
+    <main>
