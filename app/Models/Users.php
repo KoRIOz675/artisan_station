@@ -149,6 +149,9 @@ class Users
         if (isset($data['shop_name'])) {
             $sql .= ', shop_name = :shop_name';
         }
+        if (isset($data['profile_picture_path'])) { // Check if profile_picture_path key exists
+            $sql .= ', profile_picture_path = :profile_picture_path';
+        }
 
         // Add the WHERE clause - VERY IMPORTANT
         $sql .= ' WHERE id = :id';
@@ -169,6 +172,10 @@ class Users
         }
         if (isset($data['shop_name'])) {
             $this->db->bind(':shop_name', $data['shop_name']);
+        }
+        if (isset($data['profile_picture_path'])) {
+            // Bind the new filename or null if removing
+            $this->db->bind(':profile_picture_path', $data['profile_picture_path']);
         }
 
         // Execute and return success/failure
