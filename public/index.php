@@ -1,46 +1,41 @@
 <?php
-// --- Error Reporting  ---
+// --- Error Reporting ---
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 // --- Configuration ---
-require_once '../config/config.php';      // Load main config (URLROOT, DB Credentials, etc.) FIRST
-require_once '../config/database.php';    // Load DB class definition or specific DB setup AFTER config
+require_once '../config/config.php';
+require_once '../config/database.php';
 
 // --- Application Root Path ---
-// APPROOT points to the 'app' folder, needed for includes/requires
 define('APPROOT', dirname(__DIR__) . '/app');
 
 // --- Autoloader ---
-// Simple autoloader - Handles loading Core, Controllers, Models
 spl_autoload_register(function ($className) {
-    // Define possible directories for classes
     $paths = [
-        APPROOT . '/Core/',       // Use APPROOT for server paths
+        APPROOT . '/Core/',
         APPROOT . '/Controllers/',
         APPROOT . '/Models/'
     ];
-    // Convert Namespace backslashes if you start using them
     $className = str_replace('\\', '/', $className);
-
     foreach ($paths as $path) {
         $file = $path . $className . '.php';
         if (file_exists($file)) {
             require_once $file;
-            return; // Stop searching once found
-        } else {
-            // Optional: Log or handle the error if needed
-            error_log("Autoloader Error: Class file not found at " . $file);
-            // echo "<script>console.log('Autoloader Error: Class file not found at " . $file . "');</script>";
+            return;
         }
     }
+    // Keep error log for debugging non-found classes
+    error_log("Autoloader Error: Class file not found for class: " . $className);
 });
 
 // --- Load Helpers ---
+// Ensure session_helper is loaded if you use flash messages
 require_once APPROOT . '/helpers/session_helper.php';
 
-// --- Session Start (after class loading is possible) ---
+
+// --- Session Start ---
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -49,74 +44,162 @@ if (session_status() === PHP_SESSION_NONE) {
 $controllerName = 'HomeController'; // Default Controller
 $methodName = 'index';             // Default Method
 $params = [];
+$routeFound = false; // Flag for specific routes
 
-// Parse the URL from ?url= variable (set by .htaccess)
+// Parse the URL
 $url = isset($_GET['url']) ? rtrim($_GET['url'], '/') : '';
 $urlParts = !empty($url) ? explode('/', filter_var($url, FILTER_SANITIZE_URL)) : [];
 
-// --- Determine Controller ---
-if (!empty($urlParts[0])) {
-    // Format: controller name should be like 'Users' -> 'UsersController.php'
-    $potentialController = ucfirst(strtolower($urlParts[0])) . 'Controller';
-    $controllerPath = APPROOT . '/Controllers/' . $potentialController . '.php';
+// --- 1. Check for Specific Routes ---
 
-    // Debug
-    echo "<script>console.log('URL Part 0: " . ($urlParts[0] ?? 'null') . "');</script>";
-    echo "<script>console.log('Potential Controller: " . $potentialController . "');</script>";
-    echo "<script>console.log('Controller Path: " . $controllerPath . "');</script>";
+// Pattern: /artisans/{username}/products/{slug}
+if (
+    isset($urlParts[0]) && $urlParts[0] == 'artisans' &&
+    isset($urlParts[1]) && // username
+    isset($urlParts[2]) && $urlParts[2] == 'products' &&
+    isset($urlParts[3])
+) { // slug
 
-    if (file_exists($controllerPath)) {
-        $controllerName = $potentialController;
-        echo "<script>console.log('Controller Found! Switched to: " . $controllerName . "');</script>";
-        unset($urlParts[0]); // Remove controller part from URL parts
-    } else {
-        echo "<script>console.log('Controller file NOT found. Staying with default: " . $controllerName . "');</script>";
-        // Consider implementing a dedicated 404 handler here
-    }
-} else {
-    echo "<script>console.log('No URL parts for controller. Using default: " . $controllerName . "');</script>"; // Added log for homepage case
+    $controllerName = 'ProductsController';      // Explicitly set Controller
+    $methodName = 'showByArtisanAndSlug';       // Explicitly set Method
+    $params = [$urlParts[1], $urlParts[3]];     // Extract username and slug as params
+    $routeFound = true;                         // Mark route as found
+    // echo "<script>console.log('Route matched: Artisan Product Page');</script>"; // Debug
+}
+// Pattern: /marketplace/category/{slug}
+elseif (
+    isset($urlParts[0]) && $urlParts[0] == 'marketplace' &&
+    isset($urlParts[1]) && $urlParts[1] == 'category' &&
+    isset($urlParts[2])
+) { // slug
+
+    $controllerName = 'MarketplaceController';  // Explicitly set Controller
+    $methodName = 'category';                   // Explicitly set Method
+    $params = [$urlParts[2]];                   // Extract slug as param
+    $routeFound = true;                         // Mark route as found
+    // echo "<script>console.log('Route matched: Marketplace Category');</script>"; // Debug
 }
 
-// --- Instantiate Controller ---
-// Autoloader should handle loading the class file
+// --- 2. Generic Route Handling (if no specific route matched) ---
+if (!$routeFound) {
+    // --- Determine Controller ---
+    if (!empty($urlParts[0])) {
+        $controllerSlug = strtolower($urlParts[0]);
+        $potentialController = '';
+
+        // Explicit Controller Mapping (More reliable than generic ucfirst)
+        if ($controllerSlug == 'users') {
+            $potentialController = 'UsersController';
+        } elseif ($controllerSlug == 'admin') {
+            $potentialController = 'AdminController';
+        } elseif ($controllerSlug == 'events') {
+            $potentialController = 'EventsController';
+        } elseif ($controllerSlug == 'products') {
+            $potentialController = 'ProductsController';
+        } elseif ($controllerSlug == 'marketplace') {
+            $potentialController = 'MarketplaceController';
+        }
+        // Add other known controllers here...
+        else {
+            // If slug doesn't match known controllers, maybe it's a 404
+            // Or fallback to default if appropriate for your structure
+            // For now, let it try generic - but this might fail if class name differs
+            $potentialController = ucfirst($controllerSlug) . 'Controller';
+            error_log("Generic controller lookup for slug: " . $controllerSlug . " -> " . $potentialController);
+        }
+
+        $controllerPath = APPROOT . '/Controllers/' . $potentialController . '.php';
+
+        if (!empty($potentialController) && file_exists($controllerPath)) {
+            $controllerName = $potentialController;
+            unset($urlParts[0]); // Remove controller part
+            // echo "<script>console.log('Generic Route: Controller Found: " . $controllerName . "');</script>"; // Debug
+        } else {
+            // Controller file not found for this slug - Treat as 404
+            error_log("Controller file not found for slug '{$controllerSlug}' at path: {$controllerPath}");
+            // TODO: Implement a proper 404 handler/controller
+            $controllerName = 'PagesController'; // Example: Assuming a Pages controller handles errors
+            $methodName = 'notFound';
+            $params = [];
+            $routeFound = true; // Mark as handled (by 404)
+        }
+    } else {
+        // No controller specified, use default HomeController
+        $controllerName = 'HomeController';
+        $methodName = 'index';
+        // echo "<script>console.log('Generic Route: No controller specified, using default.');</script>"; // Debug
+    }
+
+    // --- Determine Method (Only if route wasn't handled by 404 above) ---
+    if (!$routeFound && isset($urlParts[1])) {
+        // Use the exact case from URL part, controller methods are case-insensitive in PHP by default
+        // but check existence using the case provided if needed
+        $potentialMethod = $urlParts[1];
+        // We need to instantiate the controller *first* to check method_exists accurately
+        // Temporarily store potential method, instantiate, then check.
+        unset($urlParts[1]); // Remove method part for now
+    } // Default method 'index' is already set
+
+    // --- Get URL Parameters ---
+    // Remaining parts of the URL are parameters (after controller/method removed)
+    // If specific route was found earlier, $params is already set correctly
+    if (!$routeFound) {
+        $params = $urlParts ? array_values($urlParts) : [];
+    }
+} // End if (!$routeFound) for generic routing
+
+
+// --- 3. Instantiate Controller ---
+$controllerInstance = null; // Initialize
 if (class_exists($controllerName)) {
-    $controllerInstance = new $controllerName(); // Instantiates HomeController, UserController etc.
-    echo "<script>console.log('Controller " . $controllerName . " instantiated.');</script>";
+    try {
+        $controllerInstance = new $controllerName();
+        // echo "<script>console.log('Controller " . $controllerName . " instantiated.');</script>"; // Debug
+    } catch (Throwable $e) { // Catch potential errors during instantiation
+        error_log("Error instantiating controller '{$controllerName}': " . $e->getMessage());
+        // TODO: Implement 500 error page
+        die("Error loading application controller.");
+    }
 } else {
-    // Handle Controller class not found error (even if file exists, class name might be wrong)
-    // die("Error: Controller class '{$controllerName}' not found. Check filename and class declaration.");
-    echo "<script>console.log('Routing Error: Controller class " . $controllerName . " not found.');</script>";
-    // Replace die with a proper 404 page later
+    error_log("Routing Error: Final Controller class '{$controllerName}' not found.");
+    // TODO: Implement 404 handler
+    die("Error: Application page not found (Controller Missing).");
 }
 
-// --- Determine Method ---
-// Checks if the second part of the URL maps to a method in the controller
-if (isset($urlParts[1])) {
-    // Format: method name should be like 'loginRegister'
-    $potentialMethod = strtolower($urlParts[1]); // Method names are case-insensitive, but keep consistent
-    // Check if method exists in the controller instance (use method_exists)
-    if (method_exists($controllerInstance, $potentialMethod)) {
-        $methodName = $potentialMethod; // Use the matched method name
-        unset($urlParts[1]); // Remove method part from URL parts
+// --- 4. Refine Method Name based on instance (if generic route) ---
+// Stored potentialMethod from generic routing step above
+if (isset($potentialMethod) && $controllerInstance && method_exists($controllerInstance, $potentialMethod)) {
+    $methodName = $potentialMethod;
+    // echo "<script>console.log('Generic Route: Method Found: " . $methodName . "');</script>"; // Debug
+} elseif (isset($potentialMethod) && $controllerInstance && !method_exists($controllerInstance, $potentialMethod)) {
+    // Method doesn't exist in the chosen controller - Treat as 404
+    error_log("Method '{$potentialMethod}' not found in controller '{$controllerName}'.");
+    // TODO: Implement 404 handler
+    // For now, maybe default to index if it exists? Or die?
+    if (method_exists($controllerInstance, 'index')) {
+        $methodName = 'index';
+        $params = []; // Reset params if falling back to index
     } else {
-        // Debug
-        echo "<script>console.log('Routing Error: Method " . $potentialMethod . " not found in controller " . $controllerName . ".' );</script>";
+        die("Error: Application action not found (Method Missing).");
     }
 }
+// If $potentialMethod wasn't set (e.g., specific route or no method in URL), $methodName retains its value ('index' or from specific route)
 
-// --- Get URL Parameters ---
-// Remaining parts of the URL are parameters
-$params = $urlParts ? array_values($urlParts) : [];
 
-// --- Dispatch Request ---
-try {
-    // Call the determined controller's method with the parameters
-    // Example: call $userControllerInstance->loginRegister() with $params=[]
-    // Example: call $productControllerInstance->show() with $params=['product-slug']
-    call_user_func_array([$controllerInstance, $methodName], $params);
-} catch (Exception $e) {
-    // Basic exception handling (replace with proper logging/error pages)
-    echo "An application error occurred: " . $e->getMessage();
-    error_log("Dispatch Error: " . $e->getMessage() . "\n" . $e->getTraceAsString());
-    // Show a user-friendly error page in production
+// --- 5. Dispatch Request ---
+if ($controllerInstance && method_exists($controllerInstance, $methodName)) {
+    try {
+        // echo "<script>console.log('Dispatching: Controller=" . get_class($controllerInstance) . ", Method=" . $methodName . ", Params=" . json_encode($params) . "');</script>"; // Debug
+        // Call the controller's method with the parameters
+        call_user_func_array([$controllerInstance, $methodName], $params);
+    } catch (Exception $e) {
+        error_log("Dispatch Error: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+        // TODO: Implement 500 error page
+        echo "An application error occurred during dispatch.";
+    }
+} else {
+    // Fallback if method still doesn't exist after all checks (shouldn't happen ideally)
+    error_log("Dispatch Error: Invalid controller or method just before call. Controller: " . ($controllerInstance ? get_class($controllerInstance) : 'null') . ", Method: " . $methodName);
+    // TODO: Implement 404 or 500 error page
+    die("Error: Unable to process request.");
 }

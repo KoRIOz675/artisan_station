@@ -215,7 +215,7 @@ class Product
         $sql = "SELECT
                     p.id, p.name, p.slug, p.price, p.image_path,
                     c.name as category_name,
-                    u.username as artisan_username, u.shop_name
+                    u.first_name as artisan_firstname, u.last_name as artisan_lastname, u.shop_name
                 FROM products p
                 LEFT JOIN categories c ON p.category_id = c.id
                 LEFT JOIN users u ON p.artisan_id = u.id
@@ -228,6 +228,34 @@ class Product
             return $this->db->single(); // Fetch a single object
         } catch (Exception $e) {
             error_log("Error fetching Art of the Week: " . $e->getMessage());
+            return false;
+        }
+    }
+    public function getActiveProductByArtisanUsernameAndSlug($artisanUsername, $productSlug)
+    {
+        try {
+            $this->db->query("SELECT
+                                p.id, p.name, p.slug, p.description, p.price, p.image_path, p.stock_quantity, p.created_at, p.artisan_id,
+                                c.name as category_name, c.slug as category_slug,
+                                u.username as artisan_username, u.shop_name, u.profile_picture_path as artisan_image, u.bio as artisan_bio
+                              FROM products p
+                              LEFT JOIN categories c ON p.category_id = c.id
+                              JOIN users u ON p.artisan_id = u.id
+                              WHERE p.slug = :product_slug
+                                AND u.username = :artisan_username
+                                AND p.is_active = 1
+                                AND u.is_active = 1
+                              LIMIT 1");
+
+            $this->db->bind(':product_slug', $productSlug);
+            $this->db->bind(':artisan_username', $artisanUsername);
+
+            $product = $this->db->single(); // Returns object or false
+
+            return $product; // Return the fetched product object or false
+
+        } catch (Exception $e) {
+            error_log("Error fetching product by artisan/slug ($artisanUsername / $productSlug): " . $e->getMessage());
             return false;
         }
     }

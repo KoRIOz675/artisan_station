@@ -17,12 +17,12 @@
             <h2 class="section-title">Featured Artisans</h2>
             <div class="week-featured-container">
                 <div class="week-featured-item">
-                    <img src="<?php echo URLROOT; ?>/img/artists/<?php echo htmlspecialchars(!empty($artisan->profile_picture_path) ? $artisan->profile_picture_path : 'default_artist.jpg'); ?>"
-                        alt="<?php echo htmlspecialchars($artisan->shop_name ?? $artisan->username ?? 'Artisan'); ?>" class="week-featured-img" />
+                    <img src="<?php echo URLROOT; ?>/img/artists/<?php echo htmlspecialchars(!empty($featuredArtisan->profile_picture_path) ? $featuredArtisan->profile_picture_path : 'default_artist.jpg'); ?>"
+                        alt="<?php echo htmlspecialchars($featuredArtisan->shop_name ?? $featuredArtisan->username ?? 'Artisan'); ?>" class="week-featured-img" />
                     <div class="week-featured-text">
-                        <h3><?php echo htmlspecialchars($artisan->shop_name ?? $artisan->username ?? 'Artisan Name'); ?></h3>
-                        <p><?php echo htmlspecialchars(substr($artisan->bio ?? '', 0, 100)); ?></p>
-                        <a href="<?php echo URLROOT . '/artisans/show/' . ($artisan->id ?? ''); ?>">View Profile</a>
+                        <h3><?php echo htmlspecialchars($featuredArtisan->first_name ?? 'Artisan Name'); ?> <?php echo htmlspecialchars($featuredArtisan->last_name ?? ''); ?></h3>
+                        <p><?php echo htmlspecialchars(substr($featuredArtisan->bio ?? '', 0, 100)); ?></p>
+                        <a href="<?php echo URLROOT . '/artisans/show/' . ($featuredArtisan->id ?? ''); ?>">View Profile</a>
                     </div>
                 </div>
                 <div class="week-featured-art-gallery">
@@ -31,7 +31,7 @@
                         <div class="artist-art-grid">
                             <?php foreach ($featuredArtisanProducts as $product): ?>
                                 <?php if (is_object($product)): ?>
-                                    <a href="<?php echo URLROOT . '/products/show/' . ($product->slug ?? $product->id); ?>" class="artist-art-item">
+                                    <a href="<?php echo URLROOT; ?>/artisans/<?php echo htmlspecialchars($featuredArtisan->username ?? 'na'); ?>/products/<?php echo htmlspecialchars($product->slug ?? $product->id); ?>" class="artist-art-item">
                                         <img src="<?php echo URLROOT; ?>/img/products/<?php echo htmlspecialchars(!empty($product->image_path) ? $product->image_path : 'default_product.jpg'); ?>"
                                             alt="<?php echo htmlspecialchars($product->name ?? 'Artwork'); ?>">
                                     </a>
@@ -63,15 +63,15 @@
             <h2 class="section-title">Featured Art of the week</h2>
             <div class="week-featured-container">
                 <div class="week-featured-item">
-                    <a href="<?php echo URLROOT . '/products/show/' . htmlspecialchars($artOfTheWeek->slug ?? $artOfTheWeek->id); ?>" class="featured-art-image-link">
+                    <a href="<?php echo URLROOT; ?>/artisans/<?php echo htmlspecialchars($featuredArtisan->username ?? 'na'); ?>/products/<?php echo htmlspecialchars($product->slug ?? $product->id); ?>" class="featured-art-image-link">
                         <img src="<?php echo PRODUCT_IMG_URL_PREFIX . htmlspecialchars(!empty($artOfTheWeek->image_path) ? $artOfTheWeek->image_path : 'default_product.jpg'); ?>"
                             alt="<?php echo htmlspecialchars($artOfTheWeek->name ?? 'Featured Artwork'); ?>" class="week-featured-img">
                     </a>
                     <div class="week-featured-text">
                         <h3><?php echo htmlspecialchars($artOfTheWeek->name ?? 'Artwork Name'); ?></h3>
                         <p>Type: <?php echo htmlspecialchars($artOfTheWeek->category_name ?? 'General Art'); ?></p>
-                        <p>By: <?php echo htmlspecialchars($artOfTheWeek->shop_name ?? $artOfTheWeek->artisan_username ?? 'Unknown Artisan'); ?></p>
-                        <a href="<?php echo URLROOT . '/products/show/' . htmlspecialchars($artOfTheWeek->slug ?? $artOfTheWeek->id); ?>" class="view-art-link">View Details</a>
+                        <p>By: <?php echo htmlspecialchars($artOfTheWeek->artisan_firstname ?? 'Unknown Artisan'); ?> <?php echo htmlspecialchars($artOfTheWeek->artisan_lastname ?? 'Unknown Artisan'); ?></p>
+                        <a href="<?php echo URLROOT; ?>/artisans/<?php echo htmlspecialchars($featuredArtisan->username ?? 'na'); ?>/products/<?php echo htmlspecialchars($product->slug ?? $product->id); ?>" class="view-art-link">View Details</a>
                     </div>
                 </div>
         </section>

@@ -24,6 +24,7 @@ class HomeController extends Controller
         $allFeaturedArtisans = $this->userModel->getFeaturedArtisans();
         $featuredArtisan = null; // Initialize
         $featuredProducts = []; // Initialize
+        $featuredArtisanProducts = []; // Initialize
 
         // Select the first one found as 'Artisan of the Week'
         if (!empty($allFeaturedArtisans)) {
@@ -33,6 +34,7 @@ class HomeController extends Controller
 
         $upcomingEvents = $this->eventModel->getUpcomingActiveEvents(3);
         $featuredProducts = $this->productModel->getFeaturedActiveProducts(6);
+        $featuredArtisanProducts = ($featuredArtisan) ? $this->productModel->getActiveProductsByArtisanId($featuredArtisan->id, 5) : [];
         $artOfTheWeek = $this->productModel->getArtOfTheWeek();
         $categories = $this->categoryModel->getAllCategories();
 
@@ -42,6 +44,7 @@ class HomeController extends Controller
             'description' => 'For Artists, by Artists',
             'cssFile' => 'home.css',
             'featuredArtisan' => $featuredArtisan,
+            'featuredArtisanProducts' => $featuredArtisanProducts,
             'artOfTheWeek' => $artOfTheWeek,
             'products' => $featuredProducts,
             'events' => $upcomingEvents,

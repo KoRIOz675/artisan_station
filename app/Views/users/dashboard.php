@@ -167,7 +167,7 @@
                                 <h4><?php echo htmlspecialchars($art->name); ?></h4>
                                 <p>$<?php echo htmlspecialchars(number_format($art->price, 2)); ?></p>
                                 <a href="<?php echo URLROOT; ?>/products/edit/<?php echo $art->id; ?>">Edit</a> |
-                                <a href="<?php echo URLROOT; ?>/products/show/<?php echo $art->slug; ?>" target="_blank">View</a>
+                                <a href="<?php echo URLROOT; ?>/artisans/<?php echo htmlspecialchars($_SESSION['user_username'] ?? 'na'); ?>/products/<?php echo htmlspecialchars($art->slug ?? $art->id); ?>" target="_blank">View</a>
                             </div>
                         <?php endforeach; ?>
                     </div>

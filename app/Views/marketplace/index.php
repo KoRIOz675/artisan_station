@@ -44,7 +44,7 @@
             <?php foreach ($data['products'] as $product): ?>
                 <?php if (is_object($product)): ?>
                     <div class="product-card" style="border: 1px solid #eee; border-radius: 5px; overflow: hidden; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                        <a href="<?php echo URLROOT; ?>/products/show/<?php echo htmlspecialchars($product->slug ?? $product->id); ?>" style="text-decoration: none; color: inherit;">
+                        <a href="<?php echo URLROOT; ?>/artisans/<?php echo htmlspecialchars($product->artisan_username ?? 'na'); ?>/products/<?php echo htmlspecialchars($product->slug ?? $product->id); ?>" style="text-decoration: none; color: inherit;">
                             <img src="<?php echo PRODUCT_IMG_URL_PREFIX . htmlspecialchars(!empty($product->image_path) ? $product->image_path : 'default_product.jpg'); ?>"
                                 alt="<?php echo htmlspecialchars($product->name ?? 'Product'); ?>"
                                 style="width: 100%; height: 200px; object-fit: cover; display: block;">

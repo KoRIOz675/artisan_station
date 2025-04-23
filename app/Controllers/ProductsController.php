@@ -21,12 +21,17 @@ class ProductsController extends Controller
     // Show all products
     public function index()
     {
-        $products = $this->productModel->getProducts();
+        $products = $this->productModel->getFilteredActiveProducts();
+        $categories = $this->categoryModel->getAllCategories();
         $data = [
-            'title' => 'Browse Creations',
-            'products' => $products
+            'title' => 'Browse All Creations',
+            'cssFile' => 'marketplace.css',
+            'products' => $products,
+            'categories' => $categories,
+            'active_category_id' => '',
+            'active_search_term' => ''
         ];
-        $this->view('products/index', $data); // Needs view: Views/products/index.php
+        $this->view('products/index', $data);
     }
 
     // Show single product
@@ -206,5 +211,39 @@ class ProductsController extends Controller
             // Validation errors occurred, reload the form with errors
             $this->view('products/create_product', $data);
         }
+    }
+
+    public function showByArtisanAndSlug($artisanUsername = '', $productSlug = '')
+    {
+        $cleanUsername = filter_var(trim($artisanUsername), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        $cleanSlug = filter_var(trim($productSlug), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+
+        if (empty($cleanUsername) || empty($cleanSlug)) {
+            error_log("showByArtisanAndSlug called with empty username or slug.");
+            $this->redirect('marketplace'); // Or show 404
+            return;
+        }
+
+        // Fetch product using the new model method (includes artisan/category info)
+        $product = $this->productModel->getActiveProductByArtisanUsernameAndSlug($cleanUsername, $cleanSlug);
+
+        // Check if product was found
+        if (!$product || !is_object($product)) {
+            error_log("Product not found for {$cleanUsername} / {$cleanSlug}");
+            $this->redirect('marketplace'); // Redirect to marketplace
+            return;
+        }
+
+        // Prepare data for the view
+        $data = [
+            // Use product name for the page title
+            'title' => htmlspecialchars($product->name),
+            'cssFile' => 'product-page.css', // Optional specific CSS
+            'product' => $product // Pass the full product object (including joined data)
+            // You might fetch related products later here if needed
+        ];
+
+        // Load the single product view
+        $this->view('products/show', $data);
     }
 }

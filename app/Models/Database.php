@@ -1,11 +1,13 @@
 <?php
-class Database {
+class Database
+{
     private static $instance = null;
     private $pdo;
     private $stmt;
     private $error;
 
-    private function __construct() {
+    private function __construct()
+    {
         // Ensure config constants are defined before attempting connection
         if (!defined('DB_HOST') || !defined('DB_NAME') || !defined('DB_USER') || !defined('DB_PASS') || !defined('DB_CHARSET')) {
             error_log('ERROR: Database configuration constants are not defined.');
@@ -31,7 +33,8 @@ class Database {
     }
 
     // Get singleton instance
-    public static function getInstance() {
+    public static function getInstance()
+    {
         if (self::$instance === null) {
             self::$instance = new Database();
         }
@@ -45,9 +48,10 @@ class Database {
     public function __wakeup() {}
 
     // Prepare statement with query
-    public function query($sql) {
-         $this->stmt = null;
-         $this->error = null;
+    public function query($sql)
+    {
+        $this->stmt = null;
+        $this->error = null;
         try {
             $this->stmt = $this->pdo->prepare($sql);
         } catch (PDOException $e) { // Directly use PDOException
@@ -57,46 +61,56 @@ class Database {
     }
 
     // Bind values
-    public function bind($param, $value, $type = null) {
-         if ($this->stmt === null) {
-             error_log("Attempted to bind on a non-prepared statement.");
-             return;
-         }
+    public function bind($param, $value, $type = null)
+    {
+        if ($this->stmt === null) {
+            error_log("Attempted to bind on a non-prepared statement.");
+            return;
+        }
         if (is_null($type)) {
             switch (true) {
                 // Use global PDO constants directly
-                case is_int($value): $type = PDO::PARAM_INT; break;
-                case is_bool($value): $type = PDO::PARAM_BOOL; break;
-                case is_null($value): $type = PDO::PARAM_NULL; break;
-                default: $type = PDO::PARAM_STR;
+                case is_int($value):
+                    $type = PDO::PARAM_INT;
+                    break;
+                case is_bool($value):
+                    $type = PDO::PARAM_BOOL;
+                    break;
+                case is_null($value):
+                    $type = PDO::PARAM_NULL;
+                    break;
+                default:
+                    $type = PDO::PARAM_STR;
             }
         }
         try {
-             $this->stmt->bindValue($param, $value, $type);
+            $this->stmt->bindValue($param, $value, $type);
         } catch (PDOException $e) { // Directly use PDOException
-             $this->error = $e->getMessage();
-             error_log("Database Bind Error: " . $this->error . " | Param: " . $param);
+            $this->error = $e->getMessage();
+            error_log("Database Bind Error: " . $this->error . " | Param: " . $param);
         }
     }
 
     // Execute the prepared statement
-    public function execute() {
+    public function execute()
+    {
         if ($this->stmt === null) {
-             $this->error = "Statement not prepared or prepare failed.";
-             error_log($this->error);
-             return false;
+            $this->error = "Statement not prepared or prepare failed.";
+            error_log($this->error);
+            return false;
         }
         try {
             return $this->stmt->execute();
         } catch (PDOException $e) { // Directly use PDOException
             $this->error = $e->getMessage();
-             error_log("Database Query Execute Error: " . $this->error);
+            error_log("Database Query Execute Error: " . $this->error);
             return false;
         }
     }
 
     // Get result set as array of objects
-    public function resultSet() {
+    public function resultSet()
+    {
         if ($this->stmt === null) return [];
         if (!$this->execute()) {
             return [];
@@ -106,36 +120,39 @@ class Database {
     }
 
     // Get single record as object
-    public function single() {
-         if ($this->stmt === null) return false;
+    public function single()
+    {
+        if ($this->stmt === null) return false;
         if (!$this->execute()) {
             return false;
         }
-         // Use global PDO constant directly
+        // Use global PDO constant directly
         return $this->stmt->fetch(PDO::FETCH_OBJ);
     }
 
     // Get row count
-    public function rowCount() {
+    public function rowCount()
+    {
         if ($this->stmt === null) return 0;
         return $this->stmt->rowCount();
     }
 
     // Get last inserted ID
-    public function lastInsertId() {
+    public function lastInsertId()
+    {
         if ($this->pdo === null) return false;
         try {
             return $this->pdo->lastInsertId();
         } catch (PDOException $e) { // Directly use PDOException
-             $this->error = $e->getMessage();
-             error_log("Database Last Insert ID Error: " . $this->error);
-             return false;
+            $this->error = $e->getMessage();
+            error_log("Database Last Insert ID Error: " . $this->error);
+            return false;
         }
     }
 
     // Get last error message
-    public function getError() {
-        return $this->error;
+    public function getError()
+    {
+        return $this->pdo->errorInfo()[2] ?? null;
     }
 }
-?>
