@@ -50,10 +50,12 @@
                                 style="width: 100%; height: 200px; object-fit: cover; display: block;">
                             <div class="product-card-body" style="padding: 15px;">
                                 <h4 style="margin: 0 0 5px 0; font-size: 1.1em;"><?php echo htmlspecialchars($product->name ?? 'Product Name'); ?></h4>
-                                <p style="font-size: 0.9em; color: #666; margin: 0 0 10px 0;">By: <?php echo htmlspecialchars($product->shop_name ?? $product->artisan_username ?? 'Artisan'); ?></p>
+                                <p style="font-size: 0.9em; color: #666; margin: 0 0 10px 0;">By:
+                                    <a href="<?php echo URLROOT . '/artisans/' . htmlspecialchars($product->artisan_username ?? ''); ?>">
+                                        <?php echo htmlspecialchars($product->shop_name ?? $product->artisan_username ?? 'Artisan'); ?>
+                                    </a>
+                                </p>
                                 <p style="font-weight: bold; color: #333; margin: 0;">$<?php echo number_format($product->price ?? 0, 2); ?></p>
-                                <?php // Optional: Add category link 
-                                ?>
                                 <?php if (!empty($product->category_name) && !empty($product->category_slug)): ?>
                                     <a href="<?php echo URLROOT; ?>/marketplace/category/<?php echo htmlspecialchars($product->category_slug); ?>" style="font-size: 0.8em; color: #007bff; display:block; margin-top: 5px;"><?php echo htmlspecialchars($product->category_name); ?></a>
                                 <?php endif; ?>

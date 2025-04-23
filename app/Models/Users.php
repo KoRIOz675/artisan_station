@@ -318,4 +318,26 @@ class Users
             return false;
         }
     }
+
+    public function getActiveArtisanByUsername($username)
+    {
+        try {
+            // Select public-facing profile information
+            $this->db->query("SELECT
+                                id, username, first_name, last_name, shop_name, bio, profile_picture_path, created_at
+                              FROM users
+                              WHERE username = :username
+                                AND role = 'artisan'
+                                AND is_active = 1
+                              LIMIT 1");
+
+            $this->db->bind(':username', $username);
+            $artisan = $this->db->single(); // Returns object or false
+
+            return $artisan;
+        } catch (Exception $e) {
+            error_log("Error fetching artisan by username ($username): " . $e->getMessage());
+            return false;
+        }
+    }
 }

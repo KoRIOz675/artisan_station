@@ -22,7 +22,7 @@
                     <div class="week-featured-text">
                         <h3><?php echo htmlspecialchars($featuredArtisan->first_name ?? 'Artisan Name'); ?> <?php echo htmlspecialchars($featuredArtisan->last_name ?? ''); ?></h3>
                         <p><?php echo htmlspecialchars(substr($featuredArtisan->bio ?? '', 0, 100)); ?></p>
-                        <a href="<?php echo URLROOT . '/artisans/show/' . ($featuredArtisan->id ?? ''); ?>">View Profile</a>
+                        <a href="<?php echo URLROOT . '/artisans/' . htmlspecialchars($featuredArtisan->username ?? ''); ?>" class="view-profile-link">View Full Profile</a>
                     </div>
                 </div>
                 <div class="week-featured-art-gallery">
@@ -37,7 +37,7 @@
                                     </a>
                                 <?php endif; ?>
                             <?php endforeach; ?>
-                            <a href="<?php echo URLROOT . '/artisans/show/' . ($featuredArtisan->id ?? ''); ?>#artworks" class="see-more-art">
+                            <a href="<?php echo URLROOT . '/artisans/' . htmlspecialchars($featuredArtisan->username ?? ''); ?>" class="see-more-art">
                                 <span>▶</span>
                             </a>
                         </div>

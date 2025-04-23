@@ -30,7 +30,7 @@ $product = $data['product'] ?? null;
                         </a>
                     </span> |
                     <span>Artisan:
-                        <a href="<?php echo URLROOT . '/artisans/show/' . htmlspecialchars($product->artisan_username ?? ''); ?>">
+                        <a href="<?php echo URLROOT . '/artisans/' . htmlspecialchars($product->artisan_username ?? ''); ?>">
                             <?php echo htmlspecialchars($product->shop_name ?? $product->artisan_username ?? 'N/A'); ?>
                         </a>
                     </span>
@@ -82,7 +82,7 @@ $product = $data['product'] ?? null;
             <div style="display:flex; align-items:center; gap: 15px;">
                 <img src="<?php echo URLROOT . '/img/artists/' . htmlspecialchars(!empty($product->artisan_image) ? $product->artisan_image : 'default_artist.jpg'); ?>" alt="<?php echo htmlspecialchars($product->shop_name ?? $product->artisan_username); ?>" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;">
                 <div>
-                    <h4><a href="<?php echo URLROOT . '/artisans/show/' . htmlspecialchars($product->artisan_username ?? ''); ?>"><?php echo htmlspecialchars($product->shop_name ?? $product->artisan_username); ?></a></h4>
+                    <h4><a href="<?php echo URLROOT . '/artisans/' . htmlspecialchars($product->artisan_username ?? ''); ?>"><?php echo htmlspecialchars($product->shop_name ?? $product->artisan_username); ?></a></h4>
                     <p style="font-size: 0.9em; color: #555;"><?php echo htmlspecialchars(substr($product->artisan_bio ?? '', 0, 150)); ?>...</p>
                 </div>
             </div>

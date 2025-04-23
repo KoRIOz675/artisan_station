@@ -66,6 +66,13 @@ if (
     $routeFound = true;                         // Mark route as found
     // echo "<script>console.log('Route matched: Artisan Product Page');</script>"; // Debug
 }
+// Pattern: /artisans/{username}
+elseif (isset($urlParts[0]) && $urlParts[0] == 'artisans' && isset($urlParts[1])) {
+    $controllerName = 'ArtisanController'; // <-- POINT TO ArtisanController
+    $methodName = 'show';                 // <-- Use the 'show' method
+    $params = [$urlParts[1]];             // Pass the username
+    $routeFound = true;
+}
 // Pattern: /marketplace/category/{slug}
 elseif (
     isset($urlParts[0]) && $urlParts[0] == 'marketplace' &&
@@ -98,6 +105,8 @@ if (!$routeFound) {
             $potentialController = 'ProductsController';
         } elseif ($controllerSlug == 'marketplace') {
             $potentialController = 'MarketplaceController';
+        } elseif ($controllerSlug == 'artisans') {
+            $potentialController = 'ArtisanController';
         }
         // Add other known controllers here...
         else {
