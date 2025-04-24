@@ -97,6 +97,23 @@ elseif (
     $params = [$urlParts[2]]; // Pass slug
     $routeFound = true;
 }
+// Static pages: /pages/{page_name}
+elseif (isset($urlParts[0]) && $urlParts[0] == 'faq' && !isset($urlParts[1])) {
+    $controllerName = 'PagesController';
+    $methodName = 'faq';
+    $params = [];
+    $routeFound = true;
+} elseif (isset($urlParts[0]) && $urlParts[0] == 'terms' && !isset($urlParts[1])) {
+    $controllerName = 'PagesController';
+    $methodName = 'terms';
+    $params = [];
+    $routeFound = true;
+} elseif (isset($urlParts[0]) && $urlParts[0] == 'privacy' && !isset($urlParts[1])) {
+    $controllerName = 'PagesController';
+    $methodName = 'privacy';
+    $params = [];
+    $routeFound = true;
+}
 
 // --- 2. Generic Route Handling (if no specific route matched) ---
 if (!$routeFound) {
@@ -124,6 +141,8 @@ if (!$routeFound) {
             $potentialController = 'CartController';
         } elseif ($controllerSlug == 'orders') {
             $potentialController = 'OrderController';
+        } elseif ($controllerSlug == 'pages') {
+            $potentialController = 'PagesController';
         }
         // Else 
         else {
@@ -140,14 +159,12 @@ if (!$routeFound) {
             $controllerName = $potentialController;
             unset($urlParts[0]); // Remove controller part
             // echo "<script>console.log('Generic Route: Controller Found: " . $controllerName . "');</script>"; // Debug
-        } else {
-            // Controller file not found for this slug - Treat as 404
-            error_log("Controller file not found for slug '{$controllerSlug}' at path: {$controllerPath}");
-            // TODO: Implement a proper 404 handler/controller
-            $controllerName = 'PagesController'; // Example: Assuming a Pages controller handles errors
-            $methodName = 'notFound';
+        }
+        if (empty($potentialController) || !file_exists(APPROOT . '/Controllers/' . $potentialController . '.php')) {
+            $controllerName = 'PagesController'; // Fallback to PagesController
+            $methodName = 'notFound';            // Use the notFound method
             $params = [];
-            $routeFound = true; // Mark as handled (by 404)
+            $routeFound = true; // Mark as handled
         }
     } else {
         // No controller specified, use default HomeController
