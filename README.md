@@ -4,7 +4,7 @@ Welcome to the website of the G7C APP group.
 
 Recall of the project:
 
-### Topic 4: Sales and promotion platform for artisans and creators
+## Topic 4: Sales and promotion platform for artisans and creators
 
 The goal of the project is to develop a website allowing artisans and independent creators (jewelers, ceramicists, woodworkers, etc.) to showcase and sell their creations.
 Each artisan can list their products for sale or through a custom order system, providing details about each piece (materials used, dimensions, price, production time, etc.).
@@ -23,14 +23,12 @@ Finally, a virtual gallery could be integrated to allow visitors to explore the 
 - Open the terminal at the `C:\xampp\htdocs` folder.
 - Clone the github repository:
 
-```
-git clone https://github.com/Cuuuuube/AppWebSite.git
-```
+    git clone https://github.com/KoRIOz675/artisan_station
 
 ### Execute
 
 - In XAMPP, run the following modules: Apache and MySQL.
-- Go to `http://localhost/AppWebSite/` to see the website.
+- Go to `http://localhost/artisan_station/` to see the website.
 - Go to `http://localhost/phpmyadmin/index.php` to open PHPMyAdmin.
 
 ### Setup
@@ -44,4 +42,4 @@ git clone https://github.com/Cuuuuube/AppWebSite.git
 
 Below is the diagram of the current version of the database. The scheme will be updated as the database is updated.
 
-![](public/img/UMLclass.png)
+![UMLDiagram](public/img/UMLclass.png)
