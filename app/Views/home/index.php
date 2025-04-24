@@ -109,19 +109,10 @@
         <div class="events-container">
             <?php if (isset($data['events']) && !empty($data['events'])): ?>
                 <?php foreach ($data['events'] as $event): ?>
-                    <?php // Check if $event is an object 
-                    ?>
                     <?php if (is_object($event)): ?>
-                        <div class="event-card"> <?php // Style this card 
-                                                    ?>
-                            <?php // Construct link using event slug (more SEO friendly) 
-                            ?>
-                            <a href="<?php echo URLROOT . '/events/view/' . htmlspecialchars($event->slug ?? $event->id); ?>">
-                                <?php // Construct image path - provide a default image if needed 
-                                ?>
-                                <a href="<?php echo URLROOT . '/events/view/' . htmlspecialchars($event->slug ?? $event->id); ?>" class="category-item" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('<?php echo EVENT_IMG_URL_PREFIX . htmlspecialchars(!empty($event->image_path) ? $event->image_path : 'default_event.jpg'); ?>');">
-                                    <div class="category-item-text"><?php echo htmlspecialchars($event->name ?? 'Event Name'); ?></div>
-                                </a>
+                        <div class="event-card">
+                            <a href="<?php echo URLROOT . '/events/show/' . htmlspecialchars($event->slug ?? $event->id); ?>" class="category-item" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('<?php echo EVENT_IMG_URL_PREFIX . htmlspecialchars(!empty($event->image_path) ? $event->image_path : 'default_event.jpg'); ?>');">
+                                <div class="category-item-text"><?php echo htmlspecialchars($event->name ?? 'Event Name'); ?></div>
                             </a>
                         </div>
                     <?php endif; ?>

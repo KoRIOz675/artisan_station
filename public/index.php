@@ -64,7 +64,6 @@ if (
     $methodName = 'showByArtisanAndSlug';       // Explicitly set Method
     $params = [$urlParts[1], $urlParts[3]];     // Extract username and slug as params
     $routeFound = true;                         // Mark route as found
-    // echo "<script>console.log('Route matched: Artisan Product Page');</script>"; // Debug
 }
 // Pattern: /artisans/{username}
 elseif (isset($urlParts[0]) && $urlParts[0] == 'artisans' && isset($urlParts[1])) {
@@ -86,6 +85,18 @@ elseif (
     $routeFound = true;                         // Mark route as found
     // echo "<script>console.log('Route matched: Marketplace Category');</script>"; // Debug
 }
+// Pattern: /events/show/{slug}
+elseif (
+    isset($urlParts[0]) && $urlParts[0] == 'events' &&
+    isset($urlParts[1]) && $urlParts[1] == 'show' &&
+    isset($urlParts[2])
+) { // slug
+
+    $controllerName = 'EventsController';
+    $methodName = 'show';
+    $params = [$urlParts[2]]; // Pass slug
+    $routeFound = true;
+}
 
 // --- 2. Generic Route Handling (if no specific route matched) ---
 if (!$routeFound) {
@@ -94,7 +105,7 @@ if (!$routeFound) {
         $controllerSlug = strtolower($urlParts[0]);
         $potentialController = '';
 
-        // Explicit Controller Mapping (More reliable than generic ucfirst)
+        // Explicit Controller Mapping
         if ($controllerSlug == 'users') {
             $potentialController = 'UsersController';
         } elseif ($controllerSlug == 'admin') {
