@@ -60,10 +60,24 @@ $event = $data['event'] ?? null; // Extract event object
                 <div class="event-description" style="line-height: 1.7;">
                     <?php echo nl2br(htmlspecialchars($event->description ?? 'No description provided.')); ?>
                 </div>
+                <div class="event-attendance-action" style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #eee;">
+                    <?php if (isset($_SESSION['user_id'])): ?>
+                        <?php if (!empty($data['is_attending'])): ?>
+                            <form action="<?php echo URLROOT; ?>/events/unattend/<?php echo $event->id; ?>" method="POST" style="display: inline;">
+                                <button type="submit" class="btn btn-warning">Cancel Attendance</button>
+                            </form>
+                        <?php else: ?>
+                            <form action="<?php echo URLROOT; ?>/events/attend/<?php echo $event->id; ?>" method="POST" style="display: inline;">
+                                <button type="submit" class="btn btn-success">Attend Event</button>
+                            </form>
+                        <?php endif; ?>
+                    <?php else: ?>
+                        <p>Log in to mark your attendance.</p>
+                    <?php endif; ?>
+                </div>
             </div>
 
-        </div> <?php // End grid 
-                ?>
+        </div>
 
     <?php else: ?>
         <h2>Event Not Found</h2>

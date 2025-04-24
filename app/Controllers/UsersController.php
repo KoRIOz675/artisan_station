@@ -232,7 +232,7 @@ class UsersController extends Controller
             'bio' => $_SESSION['user_bio'] ?? null,
             'is_active' => $_SESSION['user_is_active'] ?? 1,
             'orders' => [],
-            'attended_events' => [],
+            'attendedEventsList' => [],
             'my_events' => [],
             'arts' => [],
         ];
@@ -240,6 +240,7 @@ class UsersController extends Controller
         $data['orders'] = [];
         $data['events'] = [];
         $data['arts'] = [];
+        $data['attendedEventsList'] = $this->usersModel->getAttendedEventsByUserId($_SESSION['user_id']);
 
         if ($data['role'] === 'artisan') {
             $data['my_events'] = $this->eventModel->getEventsByArtisanId($_SESSION['user_id']);

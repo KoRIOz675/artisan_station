@@ -347,4 +347,24 @@ class Users
             return false;
         }
     }
+
+    public function getAttendedEventsByUserId($userId)
+    {
+        try {
+            // Select event details by joining events and event_attendees
+            $this->db->query("SELECT
+                                e.id, e.name, e.slug, e.description, e.start_datetime, e.location, e.image_path
+                              FROM events e
+                              JOIN event_attendees ea ON e.id = ea.event_id
+                              WHERE ea.user_id = :user_id
+                              -- Optional: Only show active events they're attending? AND e.is_active = 1
+                              ORDER BY e.start_datetime ASC"); // Order by date
+
+            $this->db->bind(':user_id', $userId, PDO::PARAM_INT);
+            return $this->db->resultSet();
+        } catch (Exception $e) {
+            error_log("Error fetching attended events for User ID ($userId): " . $e->getMessage());
+            return [];
+        }
+    }
 }

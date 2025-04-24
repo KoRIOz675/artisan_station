@@ -161,4 +161,64 @@ class Event
             return false;
         }
     }
+
+    public function isUserAttending($userId, $eventId)
+    {
+        try {
+            $this->db->query('SELECT user_id FROM event_attendees WHERE user_id = :user_id AND event_id = :event_id LIMIT 1');
+            $this->db->bind(':user_id', $userId, PDO::PARAM_INT);
+            $this->db->bind(':event_id', $eventId, PDO::PARAM_INT);
+            $this->db->execute();
+            return $this->db->rowCount() > 0;
+        } catch (Exception $e) {
+            error_log("Error checking event attendance (User: $userId, Event: $eventId): " . $e->getMessage());
+            return false; // Assume not attending on error
+        }
+    }
+
+    public function attendEvent($userId, $eventId)
+    {
+        // Double check they aren't already attending to prevent errors on primary key conflict
+        if ($this->isUserAttending($userId, $eventId)) {
+            return true; /* Already attending */
+        }
+
+        try {
+            $this->db->query('INSERT INTO event_attendees (user_id, event_id) VALUES (:user_id, :event_id)');
+            $this->db->bind(':user_id', $userId, PDO::PARAM_INT);
+            $this->db->bind(':event_id', $eventId, PDO::PARAM_INT);
+            return $this->db->execute();
+        } catch (Exception $e) {
+            // Catch potential duplicate key error if primary key check fails or isn't done
+            error_log("Error adding event attendance (User: $userId, Event: $eventId): " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function unattendEvent($userId, $eventId)
+    {
+        try {
+            $this->db->query('DELETE FROM event_attendees WHERE user_id = :user_id AND event_id = :event_id');
+            $this->db->bind(':user_id', $userId, PDO::PARAM_INT);
+            $this->db->bind(':event_id', $eventId, PDO::PARAM_INT);
+            return $this->db->execute();
+        } catch (Exception $e) {
+            error_log("Error removing event attendance (User: $userId, Event: $eventId): " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function getEventById($id)
+    {
+        try {
+            // Select at least id and slug, maybe name for debugging
+            $this->db->query('SELECT id, name, slug FROM events WHERE id = :id LIMIT 1');
+            $this->db->bind(':id', $id, PDO::PARAM_INT);
+            $event = $this->db->single();
+            return $event; // Returns object or false
+        } catch (Exception $e) {
+            error_log("Error fetching event by ID ($id): " . $e->getMessage());
+            return false;
+        }
+    }
 }

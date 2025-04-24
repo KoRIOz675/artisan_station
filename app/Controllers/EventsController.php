@@ -198,20 +198,88 @@ class EventsController extends Controller
         $event = $this->eventModel->getActiveEventBySlugWithArtisan($cleanSlug);
 
         if (!$event || !is_object($event)) {
-            // Event not found or not active
-            error_log("Active event not found for slug: {$cleanSlug}");
             $this->redirect('events');
             return;
+        }
+
+        $isAttending = false; // Default
+        if (isset($_SESSION['user_id'])) { // Only check if logged in
+            $isAttending = $this->eventModel->isUserAttending($_SESSION['user_id'], $event->id);
         }
 
         // Prepare data for the view
         $data = [
             'title' => htmlspecialchars($event->name), // Use event name as page title
-            'cssFile' => 'event-show.css', // Optional specific CSS
-            'event' => $event // Pass the full event object
+            'event' => $event,
+            'is_attending' => $isAttending
         ];
+
+        error_log("Final check - isAttending type: " . gettype($isAttending));
+        error_log("Final check - Data array for view: " . print_r($data, true));
 
         // Load the single event view
         $this->view('events/show', $data);
+    }
+
+    public function attend($eventId = 0)
+    {
+        // 1. Check Login
+        if (!isset($_SESSION['user_id'])) {
+            // flash('login_required', 'Please log in to attend events.', 'alert alert-warning');
+            $this->redirect('users/loginRegister');
+            return;
+        }
+        // 2. Validate Event ID
+        $eventId = filter_var($eventId, FILTER_VALIDATE_INT);
+        if (!$eventId || $eventId <= 0) {
+            // flash('error', 'Invalid event specified.', 'alert alert-danger');
+            $this->redirect('events');
+            return; // Redirect to list
+        }
+
+        // 3. Call Model to Attend
+        if ($this->eventModel->attendEvent($_SESSION['user_id'], $eventId)) {
+            flash('success', 'You are now marked as attending!', 'alert alert-success');
+        } else {
+            flash('error', 'Could not mark attendance. You might already be attending or an error occurred.', 'alert alert-warning');
+        }
+
+        // 4. Redirect back to the event page (or wherever appropriate)
+        // We need the slug to redirect back, fetch it first (or pass it)
+        $event = $this->eventModel->getEventById($eventId);
+        if ($event && $event->slug) {
+            $this->redirect('events/show/' . $event->slug);
+        } else {
+            $this->redirect('events'); // Fallback
+        }
+    }
+    public function unattend($eventId = 0)
+    {
+        // 1. Check Login
+        if (!isset($_SESSION['user_id'])) {
+            $this->redirect('users/loginRegister');
+            return;
+        }
+        // 2. Validate Event ID
+        $eventId = filter_var($eventId, FILTER_VALIDATE_INT);
+        if (!$eventId || $eventId <= 0) {
+            $this->redirect('events');
+            return;
+        }
+
+        // 3. Call Model to Unattend
+        if ($this->eventModel->unattendEvent($_SESSION['user_id'], $eventId)) {
+            // flash('success', 'You are no longer marked as attending.', 'alert alert-info');
+        } else {
+            // flash('error', 'Could not remove attendance.', 'alert alert-danger');
+        }
+
+        // 4. Redirect back to the event page
+        $event = $this->eventModel->getEventById($eventId); // Need getEventById in model
+        if ($event && $event->slug) {
+            $this->redirect('events/show/' . $event->slug);
+        } else {
+            $this->redirect('events');
+        }
     }
 }

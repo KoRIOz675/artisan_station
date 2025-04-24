@@ -97,6 +97,30 @@ elseif (
     $params = [$urlParts[2]]; // Pass slug
     $routeFound = true;
 }
+// Pattern: /events/attend/{id}
+elseif (
+    isset($urlParts[0]) && $urlParts[0] == 'events' &&
+    isset($urlParts[1]) && $urlParts[1] == 'attend' &&
+    isset($urlParts[2])
+) { // id
+
+    $controllerName = 'EventsController';
+    $methodName = 'attend';
+    $params = [$urlParts[2]]; // Pass event ID
+    $routeFound = true;
+}
+// Pattern: /events/unattend/{id}
+elseif (
+    isset($urlParts[0]) && $urlParts[0] == 'events' &&
+    isset($urlParts[1]) && $urlParts[1] == 'unattend' &&
+    isset($urlParts[2])
+) { // id
+
+    $controllerName = 'EventsController';
+    $methodName = 'unattend';
+    $params = [$urlParts[2]]; // Pass event ID
+    $routeFound = true;
+}
 // Static pages: /pages/{page_name}
 elseif (isset($urlParts[0]) && $urlParts[0] == 'faq' && !isset($urlParts[1])) {
     $controllerName = 'PagesController';

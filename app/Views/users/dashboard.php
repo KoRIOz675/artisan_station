@@ -109,31 +109,37 @@
         <!-- Attended Events Tab Content -->
         <div id="events-content" class="tab-pane">
             <h2>Attended Events</h2>
-            <?php if (!empty($data['events'])): ?>
+            <?php if (!empty($data['attendedEventsList'])): ?>
                 <table class="dashboard-table">
                     <thead>
                         <tr>
                             <th>Event Name</th>
-                            <th>Date</th>
+                            <th>Start Date</th>
                             <th>Location</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($data['events'] as $event): ?>
+                        <?php foreach ($data['attendedEventsList'] as $event): ?>
                             <tr>
                                 <td><?php echo htmlspecialchars($event->name); ?></td>
-                                <td><?php echo htmlspecialchars(date('Y-m-d', strtotime($event->start_datetime))); ?></td>
+                                <td><?php echo htmlspecialchars(date('Y-m-d H:i', strtotime($event->start_datetime))); ?></td>
                                 <td><?php echo htmlspecialchars($event->location ?? 'N/A'); ?></td>
-                                <td><a href="<?php echo URLROOT; ?>/events/view/<?php echo $event->slug; ?>">View Event</a></td>
+                                <td>
+                                    <a href="<?php echo URLROOT; ?>/events/show/<?php echo $event->slug; ?>" target="_blank">View Event</a>
+                                    |
+                                    <form action="<?php echo URLROOT; ?>/events/unattend/<?php echo $event->id; ?>" method="POST" style="display:inline;" onsubmit="return confirm('Cancel attendance for this event?');">
+                                        <button type="submit" class="btn-link-style" style="color: #dc3545;">Cancel Attendance</button> <?php // Link-styled button 
+                                                                                                                                        ?>
+                                    </form>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
-            <?php else: ?>
+                <?php else: ?>>
                 <p>You haven't attended any events yet (or this feature is under development).</p>
-                <?php // Placeholder Table for structure demonstration 
-                ?>
+                <p><a href="<?php echo URLROOT; ?>/events">Browse upcoming events</a>.</p>
                 <table class="dashboard-table">
                     <thead>
                         <tr>
@@ -143,8 +149,6 @@
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
-                    </tbody>
                 </table>
             <?php endif; ?>
         </div>
