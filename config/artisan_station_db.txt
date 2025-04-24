@@ -100,6 +100,15 @@ CREATE TABLE `events` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
+-- Table structure for table `attended events`
+-- --------------------------------------------------------
+CREATE TABLE `event_attendees` (
+                                    `user_id` int(10) UNSIGNED NOT NULL,
+                                    `event_id` int(10) UNSIGNED NOT NULL,
+                                    `registration_datetime` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
 -- Table structure for table `orders`
 -- --------------------------------------------------------
 CREATE TABLE `orders` (
