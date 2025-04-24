@@ -27,6 +27,9 @@ class MarketplaceController extends Controller
         // --- Get Filters/Search from GET Request ---
         $categoryId = filter_input(INPUT_GET, 'category', FILTER_VALIDATE_INT);
         $searchTerm = trim(filter_input(INPUT_GET, 'search', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? '');
+        $minPrice = filter_input(INPUT_GET, 'min_price', FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+        $maxPrice = filter_input(INPUT_GET, 'max_price', FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+        $sortBy = filter_input(INPUT_GET, 'sort_by', FILTER_SANITIZE_FULL_SPECIAL_CHARS); // e.g., 'price_asc', 'price_desc'
 
         // --- Prepare Filters for Model ---
         $filters = [];
@@ -36,21 +39,32 @@ class MarketplaceController extends Controller
         if (!empty($searchTerm)) {
             $filters['search_term'] = $searchTerm;
         }
-        // Add status filter (already handled in model query)
-        // $filters['status'] = 'active';
+        if ($minPrice !== null && $minPrice !== false && is_numeric($minPrice) && $minPrice >= 0) {
+            $filters['min_price'] = $minPrice;
+        }
+        if ($maxPrice !== null && $maxPrice !== false && is_numeric($maxPrice) && $maxPrice >= 0) {
+            $filters['max_price'] = $maxPrice;
+        }
+        if (!empty($sortBy)) {
+            $filters['sort_by'] = $sortBy;
+        }
 
         // --- Fetch Data ---
         $products = $this->productModel->getFilteredActiveProducts($filters);
-        $categories = $this->categoryModel->getAllCategories(); // For the filter dropdown
+        $categories = $this->categoryModel->getAllCategories();
 
         // --- Prepare Data for View ---
         $data = [
             'title' => 'Marketplace',
-            'cssFile' => 'marketplace.css', // Optional specific CSS
+            'cssFile' => 'marketplace.css',
             'products' => $products,
             'categories' => $categories,
-            'active_category_id' => $categoryId ?: '', // Pass active filter back to view
-            'active_search_term' => $searchTerm // Pass search term back to view
+            // Pass active filters back to view to repopulate form
+            'active_category_id' => $categoryId ?: '',
+            'active_search_term' => $searchTerm,
+            'active_min_price' => $minPrice !== null && $minPrice !== false ? $minPrice : '',
+            'active_max_price' => $maxPrice !== null && $maxPrice !== false ? $maxPrice : '',
+            'active_sort_by' => $sortBy ?: ''
         ];
 
         $this->view('marketplace/index', $data);
@@ -79,4 +93,4 @@ class MarketplaceController extends Controller
             $this->redirect('marketplace');
         }
     }
-} // End Class
+}

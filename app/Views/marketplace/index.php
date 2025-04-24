@@ -3,33 +3,60 @@
     <h1><?php echo htmlspecialchars($data['title']); ?></h1>
 
     <!-- Filter and Search Bar -->
-    <div class="filter-search-bar" style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 30px; border: 1px solid #eee;">
-        <form action="<?php echo URLROOT; ?>/marketplace" method="GET" style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center;">
+    <div class="filter-search-bar" style="background-color: #f8f9fa; padding: 15px; border-radius: 15px; margin-bottom: 30px; border: 1px solid #eee;">
+        <form action="<?php echo URLROOT; ?>/marketplace" method="GET" style="display: flex; flex-wrap: wrap; gap: 15px; align-items: left; flex-direction: column; width: 100%;">
 
-            <div class="filter-group">
-                <label for="category-filter" style="margin-right: 5px; font-weight: bold;">Category:</label>
-                <select name="category" id="category-filter" class="form-control form-control-sm" style="display: inline-block; width: auto;">
-                    <option value="">All Categories</option>
-                    <?php if (isset($data['categories']) && !empty($data['categories'])): ?>
-                        <?php foreach ($data['categories'] as $category): ?>
-                            <?php if (is_object($category)): ?>
-                                <option value="<?php echo $category->id; ?>" <?php echo (isset($data['active_category_id']) && $data['active_category_id'] == $category->id) ? 'selected' : ''; ?>>
-                                    <?php echo htmlspecialchars($category->name); ?>
-                                </option>
+            <div class="filter-group" style="display: flex; flex-direction: column; justify-content: left; width: 100%; margin-bottom: 15px;">
+                <label for="search-input" style="font-size: 30px; margin: 0.2em 1.3em">Search:</label>
+                <input type="search" style="width: 100%;  padding: 1em 1em; border-radius: 1em; border: none; background-color: #f0f0f0; outline: #d9d9d9 solid 3px; outline-offset: -3px;" name="search" id="search-input" class="form-control form-control-sm" placeholder="Product, artist, keyword..." value="<?php echo htmlspecialchars($data['active_search_term'] ?? ''); ?>">
+            </div>
+
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; justify-content: space-between ;">
+                <div style="display: flex; gap: 15px; flex-wrap: wrap; justify-content: space-between ;">
+                    <div class="filter-group" style="display: flex; align-items: center; justify-content: center;">
+                        <label for="category-filter" style="font-size: 20px;">Category:</label>
+                        <select name="category" id="category-filter" class="form-control form-control-sm"
+                            style="margin: 0 1em; border: 1px solid #800000; border-radius: 5px; height: 30px; padding: 0 8px; font-size: medium; font-family: Alata, sans-serif;">
+                            <option value="">All Categories</option>
+                            <?php if (isset($data['categories']) && !empty($data['categories'])): ?>
+                                <?php foreach ($data['categories'] as $category): ?>
+                                    <?php if (is_object($category)): ?>
+                                        <option value="<?php echo $category->id; ?>" <?php echo (isset($data['active_category_id']) && $data['active_category_id'] == $category->id) ? 'selected' : ''; ?>>
+                                            <?php echo htmlspecialchars($category->name); ?>
+                                        </option>
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
                             <?php endif; ?>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </select>
-            </div>
+                        </select>
+                    </div>
 
-            <div class="filter-group" style="flex-grow: 1;">
-                <label for="search-input" style="margin-right: 5px; font-weight: bold;">Search:</label>
-                <input type="search" name="search" id="search-input" class="form-control form-control-sm" placeholder="Product, artist, keyword..." value="<?php echo htmlspecialchars($data['active_search_term'] ?? ''); ?>" style="display: inline-block; width: auto; min-width: 250px;">
-            </div>
+                    <div class="filter-group" style="display: flex; align-items: center; justify-content: center;">
+                        <label for="sort_by" style="font-size: 20px;">Sort:</label>
+                        <select name="sort_by" id="sort_by" class="form-control form-control-sm filter-input"
+                            style="margin: 0 1em; border: 1px solid #800000; border-radius: 5px; height: 30px; padding: 0 8px; font-size: medium; font-family: Alata, sans-serif;">
+                            <option value="" <?php echo ($data['active_sort_by'] == '') ? 'selected' : ''; ?>>Newest</option>
+                            <option value="price_asc" <?php echo ($data['active_sort_by'] == 'price_asc') ? 'selected' : ''; ?>>Price: Low to High</option>
+                            <option value="price_desc" <?php echo ($data['active_sort_by'] == 'price_desc') ? 'selected' : ''; ?>>Price: High to Low</option>
+                            <option value="name_asc" <?php echo ($data['active_sort_by'] == 'name_asc') ? 'selected' : ''; ?>>Name: A to Z</option>
+                        </select>
+                    </div>
 
-            <div class="filter-group">
-                <button type="submit" class="btn btn-primary btn-sm">Filter / Search</button>
-                <a href="<?php echo URLROOT; ?>/marketplace" class="btn btn-secondary btn-sm" style="margin-left: 5px;">Clear</a>
+                    <div class="filter-group" style="display: flex; align-items: center; justify-content: center;">
+                        <label for="min_price" style="font-size: 20px;">Price:</label>
+                        <input type="number" name="min_price" id="min_price" placeholder="Min $" step="0.01" min="0"
+                            value="<?php echo htmlspecialchars($data['active_min_price'] ?? ''); ?>"
+                            class="form-control form-control-sm filter-input" style="margin: 0 1em; border: 1px solid #800000; border-radius: 5px; height: 30px; padding: 0 8px; font-size: medium; font-family: Alata, sans-serif;">
+                        <span style="margin: 0 5px;">-</span>
+                        <input type="number" name="max_price" id="max_price" placeholder="Max $" step="0.01" min="0"
+                            value="<?php echo htmlspecialchars($data['active_max_price'] ?? ''); ?>"
+                            class="form-control form-control-sm filter-input" style="margin: 0 1em; border: 1px solid #800000; border-radius: 5px; height: 30px; padding: 0 8px; font-size: medium; font-family: Alata, sans-serif;">
+                    </div>
+                </div>
+
+                <div class="filter-group" style="display: flex; align-items: center; justify-content: center; margin: 0 2em; gap: 15px;">
+                    <button type="submit" class="btn btn-primary btn-sm">Search</button>
+                    <a href="<?php echo URLROOT; ?>/marketplace" class="btn btn-secondary">Clear</a>
+                </div>
             </div>
 
         </form>
@@ -59,6 +86,18 @@
                                 <?php if (!empty($product->category_name) && !empty($product->category_slug)): ?>
                                     <a href="<?php echo URLROOT; ?>/marketplace/category/<?php echo htmlspecialchars($product->category_slug); ?>" style="font-size: 0.8em; color: #007bff; display:block; margin-top: 5px;"><?php echo htmlspecialchars($product->category_name); ?></a>
                                 <?php endif; ?>
+                                <form action="<?php echo URLROOT; ?>/cart/add" method="POST" style="margin-top: 10px;">
+                                    <input type="hidden" name="product_id" value="<?php echo $product->id; ?>">
+                                    <input type="hidden" name="quantity" value="1"> <?php // Default quantity 1 
+                                                                                    ?>
+                                    <?php // Basic stock check before showing button 
+                                    ?>
+                                    <?php if (isset($product->stock_quantity) && $product->stock_quantity !== 0): ?>
+                                        <button type="submit" class="btn btn-sm btn-primary">Add to Cart</button>
+                                    <?php else: ?>
+                                        <span style="font-size: 0.8em; color: #6c757d;">Out of Stock</span>
+                                    <?php endif; ?>
+                                </form>
                             </div>
                         </a>
                     </div>

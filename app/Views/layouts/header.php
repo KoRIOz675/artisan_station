@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($data['title'] ?? 'Artisan Marketplace'); ?></title>
+    <link rel="icon" href="<?php echo URLROOT; ?>/img/logo.png" type="image/png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="<?php echo URLROOT; ?>/css/header-footer.css">
     <link rel="stylesheet" href="<?php echo URLROOT; ?>/css/main.css">

@@ -114,4 +114,51 @@ class Event
         $this->db->bind(':id', $eventId, PDO::PARAM_INT);
         return $this->db->execute();
     }
+
+    public function getActiveEvents($upcomingOnly = true)
+    {
+        $sql = "SELECT e.id, e.name, e.slug, e.description, e.start_datetime, e.location, e.image_path,
+                       u.username as artisan_username, u.shop_name as artisan_shop_name
+                FROM events e
+                LEFT JOIN users u ON e.artisan_id = u.id
+                WHERE e.is_active = 1";
+
+        if ($upcomingOnly) {
+            $sql .= " AND e.start_datetime >= NOW()";
+        }
+
+        $sql .= " ORDER BY e.start_datetime ASC"; // Show soonest first
+
+        try {
+            $this->db->query($sql);
+            return $this->db->resultSet();
+        } catch (Exception $e) {
+            error_log("Error fetching active events: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    public function getActiveEventBySlugWithArtisan($slug)
+    {
+        try {
+            $this->db->query("SELECT
+                                e.*,  -- Select all from events table
+                                u.username as artisan_username,
+                                u.shop_name as artisan_shop_name,
+                                u.profile_picture_path as artisan_image_path
+                              FROM events e
+                              LEFT JOIN users u ON e.artisan_id = u.id
+                              WHERE e.slug = :slug AND e.is_active = 1
+                              LIMIT 1");
+
+            $this->db->bind(':slug', $slug);
+            $event = $this->db->single();
+
+            return $event; // Returns object or false
+
+        } catch (Exception $e) {
+            error_log("Error fetching event by slug ($slug): " . $e->getMessage());
+            return false;
+        }
+    }
 }

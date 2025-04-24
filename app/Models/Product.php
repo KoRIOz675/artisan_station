@@ -124,6 +124,7 @@ class Product
 
     public function getFilteredActiveProducts(array $filters = [])
     {
+        // Base query
         $sql = "SELECT
                     p.id, p.name, p.slug, p.description, p.price, p.image_path, p.created_at,
                     c.name as category_name, c.slug as category_slug,
@@ -131,9 +132,9 @@ class Product
                 FROM products p
                 LEFT JOIN categories c ON p.category_id = c.id
                 LEFT JOIN users u ON p.artisan_id = u.id
-                WHERE p.is_active = 1"; // Start with only active products
+                WHERE p.is_active = 1"; // Start with active products
 
-        $bindings = []; // Array to hold PDO bindings
+        $bindings = [];
 
         // --- Apply Category Filter ---
         if (!empty($filters['category_id']) && filter_var($filters['category_id'], FILTER_VALIDATE_INT)) {
@@ -141,9 +142,24 @@ class Product
             $bindings[':category_id'] = (int)$filters['category_id'];
         }
 
+        // --- Apply Price Filter ---
+        // Min Price
+        if (!empty($filters['min_price']) && is_numeric($filters['min_price']) && $filters['min_price'] >= 0) {
+            $sql .= " AND p.price >= :min_price";
+            $bindings[':min_price'] = $filters['min_price']; // Let PDO handle type
+        }
+        // Max Price
+        if (!empty($filters['max_price']) && is_numeric($filters['max_price']) && $filters['max_price'] >= 0) {
+            // Ensure max is not less than min if both provided (optional)
+            if (!isset($bindings[':min_price']) || $filters['max_price'] >= $bindings[':min_price']) {
+                $sql .= " AND p.price <= :max_price";
+                $bindings[':max_price'] = $filters['max_price'];
+            }
+        }
+
         // --- Apply Search Filter ---
         if (!empty($filters['search_term'])) {
-            $searchTerm = '%' . trim($filters['search_term']) . '%'; // Add wildcards
+            $searchTerm = '%' . trim($filters['search_term']) . '%';
             // Search product name, description, category name, artisan username/shop name
             $sql .= " AND (p.name LIKE :search_term
                            OR p.description LIKE :search_term
@@ -153,30 +169,32 @@ class Product
             $bindings[':search_term'] = $searchTerm;
         }
 
-        // --- Ordering ---
-        $sql .= " ORDER BY p.created_at DESC"; // Default order
-
-        // --- Pagination  ---
-        if (isset($filters['limit']) && isset($filters['offset'])) {
-            $sql .= " LIMIT :limit OFFSET :offset";
-            $bindings[':limit'] = (int)$filters['limit'];
-            $bindings[':offset'] = (int)$filters['offset'];
+        // --- Ordering (Example: Add price ordering option) ---
+        $orderBy = 'p.created_at DESC'; // Default
+        if (!empty($filters['sort_by'])) {
+            if ($filters['sort_by'] === 'price_asc') {
+                $orderBy = 'p.price ASC';
+            } elseif ($filters['sort_by'] === 'price_desc') {
+                $orderBy = 'p.price DESC';
+            } elseif ($filters['sort_by'] === 'name_asc') {
+                $orderBy = 'p.name ASC';
+            }
+            // Add other sort options if needed
         }
+        $sql .= " ORDER BY " . $orderBy;
+
+        // --- Pagination (Add later) ---
 
         try {
+
             $this->db->query($sql);
-            // Bind all collected parameters
             foreach ($bindings as $param => $value) {
-                // Determine type (simple version)
-                $type = is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR;
+                $type = is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR; // Simple type check
                 $this->db->bind($param, $value, $type);
             }
             return $this->db->resultSet();
-        } catch (Exception $e) {
-            error_log("Error fetching filtered products: " . $e->getMessage());
-            error_log("SQL: " . $sql);
-            error_log("Bindings: " . print_r($bindings, true));
-            return []; // Return empty on error
+        } catch (Exception $e) { /* ... Error logging ... */
+            return [];
         }
     }
 
@@ -256,6 +274,43 @@ class Product
 
         } catch (Exception $e) {
             error_log("Error fetching product by artisan/slug ($artisanUsername / $productSlug): " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function decrementStock($productId, $quantityToDecrement)
+    {
+        if ($quantityToDecrement <= 0) return true; // No change needed
+
+        // Note: This doesn't prevent overselling in high-concurrency scenarios without row locking,
+        // but it's a basic check for single-user flow.
+        try {
+            $this->db->query('UPDATE products
+                               SET stock_quantity = stock_quantity - :quantity
+                               WHERE id = :id AND stock_quantity >= :quantity'); // Prevent going below zero
+
+            $this->db->bind(':quantity', $quantityToDecrement, PDO::PARAM_INT);
+            $this->db->bind(':id', $productId, PDO::PARAM_INT);
+
+            if ($this->db->execute()) {
+                // Check if any row was actually updated (means stock was sufficient)
+                return $this->db->rowCount() > 0;
+            } else {
+                return false; // DB execution failed
+            }
+        } catch (Exception $e) {
+            error_log("Error decrementing stock for product $productId: " . $e->getMessage());
+            return false;
+        }
+    }
+    public function getProductForCart($id)
+    {
+        try {
+            $this->db->query('SELECT id, name, price, stock_quantity, image_path, slug FROM products WHERE id = :id AND is_active = 1');
+            $this->db->bind(':id', $id, PDO::PARAM_INT);
+            return $this->db->single(); // Returns object or false
+        } catch (Exception $e) {
+            error_log("Error fetching product for cart (ID: $id): " . $e->getMessage());
             return false;
         }
     }

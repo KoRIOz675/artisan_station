@@ -6,8 +6,6 @@ $product = $data['product'] ?? null;
 <div class="container product-page-container" style="padding: 20px;">
 
     <?php if ($product && is_object($product)): ?>
-        <?php // Basic Two Column Layout 
-        ?>
         <div class="product-details-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
 
             <!-- Left Column: Image(s) -->
@@ -57,14 +55,13 @@ $product = $data['product'] ?? null;
                 </div>
 
                 <!-- Add to Cart Form (Placeholder) -->
-                <form action="<?php echo URLROOT; ?>/cart/add/<?php echo $product->id; ?>" method="POST">
-                    <?php // Add quantity input if stock > 0 or if made-to-order allows 
-                    ?>
-                    <?php if (isset($product->stock_quantity) && $product->stock_quantity !== 0): // Allow adding if stock is > 0 OR null/undefined (assumed available) 
-                    ?>
+                <form action="<?php echo URLROOT; ?>/cart/add" method="POST" style="margin-top: 25px;">
+                    <input type="hidden" name="product_id" value="<?php echo $product->id; ?>">
+
+                    <?php if (isset($product->stock_quantity) && $product->stock_quantity !== 0): ?>
                         <label for="quantity" style="margin-right: 10px;">Quantity:</label>
                         <input type="number" id="quantity" name="quantity" value="1" min="1" <?php echo ($product->stock_quantity > 0) ? 'max="' . $product->stock_quantity . '"' : ''; ?> style="width: 60px; padding: 5px;">
-                        <button type="submit" class="btn btn-primary" style="margin-left: 15px;">Add to Cart</button>
+                        <button type="submit" class="btn btn-success" style="margin-left: 15px;">Add to Cart</button>
                     <?php else: ?>
                         <button type="button" class="btn btn-secondary" disabled>Out of Stock</button>
                     <?php endif; ?>

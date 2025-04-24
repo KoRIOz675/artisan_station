@@ -155,4 +155,9 @@ class Database
     {
         return $this->pdo->errorInfo()[2] ?? null;
     }
+
+    public function getPDO()
+    {
+        return $this->pdo;
+    }
 }
