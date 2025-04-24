@@ -23,7 +23,9 @@ Finally, a virtual gallery could be integrated to allow visitors to explore the 
 - Open the terminal at the `C:\xampp\htdocs` folder.
 - Clone the github repository:
 
-    git clone https://github.com/KoRIOz675/artisan_station
+```text
+git clone https://github.com/KoRIOz675/artisan_station
+```
 
 ### Execute
 
