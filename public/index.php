@@ -121,6 +121,41 @@ elseif (
     $params = [$urlParts[2]]; // Pass event ID
     $routeFound = true;
 }
+// Pattern: /products/create (GET)
+elseif (isset($urlParts[0]) && $urlParts[0] == 'products' && isset($urlParts[1]) && $urlParts[1] == 'create' && !isset($urlParts[2])) {
+    $controllerName = 'ProductsController';
+    $methodName = 'create';
+    $params = [];
+    $routeFound = true;
+}
+// Pattern: /products/store (POST)
+elseif (isset($urlParts[0]) && $urlParts[0] == 'products' && isset($urlParts[1]) && $urlParts[1] == 'store' && !isset($urlParts[2])) {
+    $controllerName = 'ProductsController';
+    $methodName = 'store'; // Requires POST check inside method
+    $params = [];
+    $routeFound = true;
+}
+// Pattern: /products/edit/{id} (GET)
+elseif (isset($urlParts[0]) && $urlParts[0] == 'products' && isset($urlParts[1]) && $urlParts[1] == 'edit' && isset($urlParts[2])) {
+    $controllerName = 'ProductsController';
+    $methodName = 'edit';
+    $params = [$urlParts[2]]; // Pass ID
+    $routeFound = true;
+}
+// Pattern: /products/update/{id} (POST)
+elseif (isset($urlParts[0]) && $urlParts[0] == 'products' && isset($urlParts[1]) && $urlParts[1] == 'update' && isset($urlParts[2])) {
+    $controllerName = 'ProductsController';
+    $methodName = 'update'; // Requires POST check inside method
+    $params = [$urlParts[2]]; // Pass ID
+    $routeFound = true;
+}
+// Pattern: /products/destroy/{id} (POST)
+elseif (isset($urlParts[0]) && $urlParts[0] == 'products' && isset($urlParts[1]) && $urlParts[1] == 'destroy' && isset($urlParts[2])) {
+    $controllerName = 'ProductsController';
+    $methodName = 'destroy'; // Requires POST check inside method
+    $params = [$urlParts[2]]; // Pass ID
+    $routeFound = true;
+}
 // Static pages: /pages/{page_name}
 elseif (isset($urlParts[0]) && $urlParts[0] == 'faq' && !isset($urlParts[1])) {
     $controllerName = 'PagesController';

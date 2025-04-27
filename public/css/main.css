@@ -105,3 +105,14 @@ a {
     background-color: #5a6268;
     border-color: #545b62;
 }
+
+.in-text-link {
+    color: #007bff;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.15s ease-in-out;
+}
+.in-text-link:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}

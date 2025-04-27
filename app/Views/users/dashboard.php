@@ -137,9 +137,9 @@
                         <?php endforeach; ?>
                     </tbody>
                 </table>
-                <?php else: ?>>
-                <p>You haven't attended any events yet (or this feature is under development).</p>
-                <p><a href="<?php echo URLROOT; ?>/events">Browse upcoming events</a>.</p>
+            <?php else: ?>
+                <p>You haven't attended any events yet.</p>
+                <p><a href="<?php echo URLROOT; ?>/events" class="in-text-link">Browse upcoming events</a>.</p>
                 <table class="dashboard-table">
                     <thead>
                         <tr>
@@ -165,15 +165,19 @@
                 <h3>My Listed Arts</h3>
                 <?php if (!empty($data['arts'])): ?>
                     <div class="arts-grid">
-                        <?php foreach ($data['arts'] as $art): ?>
-                            <div class="art-card">
-                                <img src="<?php echo URLROOT . '/img/products/' . ($art->image_path ?? 'default.jpg'); ?>" alt="<?php echo htmlspecialchars($art->name); ?>">
-                                <h4><?php echo htmlspecialchars($art->name); ?></h4>
-                                <p>$<?php echo htmlspecialchars(number_format($art->price, 2)); ?></p>
-                                <a href="<?php echo URLROOT; ?>/products/edit/<?php echo $art->id; ?>">Edit</a> |
-                                <a href="<?php echo URLROOT; ?>/artisans/<?php echo htmlspecialchars($_SESSION['user_username'] ?? 'na'); ?>/products/<?php echo htmlspecialchars($art->slug ?? $art->id); ?>" target="_blank">View</a>
-                            </div>
-                        <?php endforeach; ?>
+                        <?php foreach ($data['arts'] as $art): if (is_object($art)): ?>
+                                <div class="art-card">
+                                    <img src="<?php echo PRODUCT_IMG_URL_PREFIX . ($art->image_path ?? 'default.jpg'); ?>" alt="<?php echo htmlspecialchars($art->name); ?>">
+                                    <h4><?php echo htmlspecialchars($art->name); ?></h4>
+                                    <p>$<?php echo htmlspecialchars(number_format($art->price, 2)); ?></p>
+                                    <a style="border: 0; background-color: inherit; font-family: Alata, sans-serif; font-size: medium;" href="<?php echo URLROOT; ?>/products/edit/<?php echo $art->id; ?>">Edit</a> |
+                                    <a style="border: 0; background-color: inherit; font-family: Alata, sans-serif; font-size: medium;" href="<?php echo URLROOT; ?>/artisans/<?php echo htmlspecialchars($_SESSION['user_username'] ?? 'na'); ?>/products/<?php echo htmlspecialchars($art->slug ?? $art->id); ?>" target="_blank">View</a> |
+                                    <form action="<?php echo URLROOT; ?>/products/destroy/<?php echo $art->id; ?>" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this product?');">
+                                        <button type="submit" style="border: 0; background-color: inherit; font-family: Alata, sans-serif; font-size: medium;">Delete</button>
+                                    </form>
+                                </div>
+                        <?php endif;
+                        endforeach; ?>
                     </div>
                 <?php else: ?>
                     <p>You haven't uploaded any art pieces yet.</p>

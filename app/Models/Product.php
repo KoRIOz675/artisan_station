@@ -12,7 +12,7 @@ class Product
     // Get product by ID
     public function getProductById($id)
     {
-        $this->db->query('SELECT p.*, u.name as artisan_name, u.shop_name
+        $this->db->query('SELECT p.*, u.username as artisan_username, u.first_name as artisan_first_name, u.last_name as artisan_last_name, u.shop_name
                           FROM products p
                           JOIN users u ON p.artisan_id = u.id
                           WHERE p.id = :id');
@@ -313,5 +313,91 @@ class Product
             error_log("Error fetching product for cart (ID: $id): " . $e->getMessage());
             return false;
         }
+    }
+
+    public function updateProduct($data)
+    {
+        // Ensure required IDs are present
+        if (!isset($data['id']) || !isset($data['artisan_id'])) {
+            error_log("Update Product Error: Missing ID or Artisan ID.");
+            return false;
+        }
+
+        try {
+            // Base query part
+            $sql = 'UPDATE products SET
+                        category_id = :category_id,
+                        name = :name,
+                        slug = :slug,
+                        description = :description,
+                        price = :price,
+                        stock_quantity = :stock_quantity,
+                        is_active = :is_active'; // Allow updating active status
+
+            // Only add image path to the query if it's provided in $data
+            if (array_key_exists('image_path', $data)) { // Use array_key_exists to handle potential null value
+                $sql .= ', image_path = :image_path';
+            }
+
+            // WHERE clause includes ownership check
+            $sql .= ' WHERE id = :id AND artisan_id = :artisan_id';
+
+            // Regenerate slug based on potentially updated name
+            $slug = $this->generateUniqueSlug($data['name']);
+            if ($slug === false) return false; // Slug generation failed
+
+            // Prepare and Bind
+            $this->db->query($sql);
+
+            $this->db->bind(':category_id', $data['category_id'], PDO::PARAM_INT);
+            $this->db->bind(':name', $data['name']);
+            $this->db->bind(':slug', $slug); // Bind the potentially new slug
+            $this->db->bind(':description', $data['description']);
+            $this->db->bind(':price', $data['price']);
+            $this->db->bind(':stock_quantity', $data['stock_quantity'] ?? 0, PDO::PARAM_INT);
+            $this->db->bind(':is_active', $data['is_active'] ?? 1, PDO::PARAM_INT); // Allow setting inactive maybe?
+            $this->db->bind(':id', $data['id'], PDO::PARAM_INT);
+            $this->db->bind(':artisan_id', $data['artisan_id'], PDO::PARAM_INT);
+
+            // Bind image path only if it was included in the SQL
+            if (array_key_exists('image_path', $data)) {
+                $this->db->bind(':image_path', $data['image_path']); // Can be null to remove image
+            }
+
+            return $this->db->execute();
+        } catch (Exception $e) {
+            error_log("Error updating product ID ({$data['id']}): " . $e->getMessage());
+            error_log("Product Update Data: " . print_r($data, true));
+            return false;
+        }
+    }
+
+    public function deleteProduct($id, $artisan_id)
+    {
+        try {
+            // Double-check ownership in the DELETE query itself
+            $this->db->query('DELETE FROM products WHERE id = :id AND artisan_id = :artisan_id');
+            $this->db->bind(':id', $id, PDO::PARAM_INT);
+            $this->db->bind(':artisan_id', $artisan_id, PDO::PARAM_INT);
+            return $this->db->execute();
+        } catch (Exception $e) {
+            error_log("Error deleting product ID ($id) for artisan ($artisan_id): " . $e->getMessage());
+            return false;
+        }
+    }
+
+    private function generateUniqueSlug($name)
+    {
+        $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $name), '-'));
+        if (empty($slug)) $slug = 'product';
+        $originalSlug = $slug;
+        $counter = 1;
+        while ($this->findProductBySlug($slug)) {
+            $slug = $originalSlug . '-' . $counter++;
+            if ($counter > 100) {
+                return false;
+            } // Safety break
+        }
+        return $slug;
     }
 }

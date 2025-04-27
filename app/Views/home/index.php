@@ -5,8 +5,8 @@
         <img src="<?php echo URLROOT; ?>/img/artisan-doing-woodcutting.jpg" alt="Artisan working">
         <div class="bottom">
             <div class="text-main">
-                <h1><?php echo isset($title) ? htmlspecialchars($title) : 'Welcome'; ?></h1>
-                <p><?php echo isset($description) ? htmlspecialchars($description) : 'Discover unique creations.'; ?></p>
+                <h1>Artisan Station</h1>
+                <p>For Artists, By Artists</p>
             </div>
         </div>
     </section>
@@ -22,7 +22,7 @@
                     <div class="week-featured-text">
                         <h3><?php echo htmlspecialchars($featuredArtisan->first_name ?? 'Artisan Name'); ?> <?php echo htmlspecialchars($featuredArtisan->last_name ?? ''); ?></h3>
                         <p><?php echo htmlspecialchars(substr($featuredArtisan->bio ?? '', 0, 100)); ?></p>
-                        <a href="<?php echo URLROOT . '/artisans/' . htmlspecialchars($featuredArtisan->username ?? ''); ?>" class="view-profile-link">View Full Profile</a>
+                        <a href="<?php echo URLROOT . '/artisans/' . htmlspecialchars($featuredArtisan->username ?? ''); ?>" class="in-text-link">View Full Profile</a>
                     </div>
                 </div>
                 <div class="week-featured-art-gallery">
@@ -71,7 +71,7 @@
                         <h3><?php echo htmlspecialchars($artOfTheWeek->name ?? 'Artwork Name'); ?></h3>
                         <p>Type: <?php echo htmlspecialchars($artOfTheWeek->category_name ?? 'General Art'); ?></p>
                         <p>By: <?php echo htmlspecialchars($artOfTheWeek->artisan_firstname ?? 'Unknown Artisan'); ?> <?php echo htmlspecialchars($artOfTheWeek->artisan_lastname ?? 'Unknown Artisan'); ?></p>
-                        <a href="<?php echo URLROOT; ?>/artisans/<?php echo htmlspecialchars($featuredArtisan->username ?? 'na'); ?>/products/<?php echo htmlspecialchars($product->slug ?? $product->id); ?>" class="view-art-link">View Details</a>
+                        <a href="<?php echo URLROOT; ?>/artisans/<?php echo htmlspecialchars($featuredArtisan->username ?? 'na'); ?>/products/<?php echo htmlspecialchars($product->slug ?? $product->id); ?>" class="in-text-link">View Details</a>
                     </div>
                 </div>
         </section>
