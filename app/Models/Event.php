@@ -221,4 +221,94 @@ class Event
             return false;
         }
     }
+
+    public function getEventByIdForEdit($id)
+    {
+        $this->db->query('SELECT * FROM events WHERE id = :id');
+        $this->db->bind(':id', $id, PDO::PARAM_INT);
+        return $this->db->single();
+    }
+
+    // Update an existing event
+    public function updateEvent($data)
+    {
+        // Regenerate slug if name changes, ensuring uniqueness excluding current ID
+        $currentEvent = $this->getEventById($data['id']); // Use existing getEventById
+        $slug = $currentEvent->slug; // Default to original slug
+        if ($currentEvent && $currentEvent->name !== $data['name']) {
+            $newSlugBase = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $data['name']), '-'));
+            $slug = $newSlugBase;
+            $counter = 1;
+            while ($this->findEventBySlugExcludingId($slug, $data['id'])) { // New helper method
+                $slug = $newSlugBase . '-' . $counter++;
+            }
+        }
+
+        $sql = 'UPDATE events SET
+                    name = :name,
+                    slug = :slug,
+                    description = :description,
+                    start_datetime = :start_datetime,
+                    end_datetime = :end_datetime,
+                    location = :location,
+                    is_active = :is_active';
+
+        // Only include image_path in update if a new one is provided
+        if (isset($data['image_path'])) {
+            $sql .= ', image_path = :image_path';
+        }
+
+        $sql .= ' WHERE id = :id AND artisan_id = :artisan_id'; // Crucial ownership check
+
+        try {
+            $this->db->query($sql);
+            $this->db->bind(':name', $data['name']);
+            $this->db->bind(':slug', $slug);
+            $this->db->bind(':description', $data['description']);
+            $this->db->bind(':start_datetime', $data['start_datetime']);
+            $this->db->bind(':end_datetime', $data['end_datetime']); // Can be null
+            $this->db->bind(':location', $data['location']);       // Can be null
+            $this->db->bind(':is_active', $data['is_active'], PDO::PARAM_INT);
+            $this->db->bind(':id', $data['id'], PDO::PARAM_INT);
+            $this->db->bind(':artisan_id', $data['artisan_id'], PDO::PARAM_INT);
+
+            if (isset($data['image_path'])) {
+                $this->db->bind(':image_path', $data['image_path']); // Can be null if removing
+            }
+            return $this->db->execute();
+        } catch (Exception $e) {
+            error_log("Error updating event ID ({$data['id']}): " . $e->getMessage());
+            error_log("Event Update Data: " . print_r($data, true));
+            return false;
+        }
+    }
+
+    // Helper to find event by slug, excluding a specific ID (for updates)
+    public function findEventBySlugExcludingId($slug, $excludeId)
+    {
+        $this->db->query('SELECT id FROM events WHERE slug = :slug AND id != :exclude_id LIMIT 1');
+        $this->db->bind(':slug', $slug);
+        $this->db->bind(':exclude_id', $excludeId, PDO::PARAM_INT);
+        $this->db->execute();
+        return $this->db->rowCount() > 0;
+    }
+
+    // Delete an event (with ownership check)
+    public function deleteEvent($id, $artisanId)
+    {
+        try {
+            // Optional: Delete from event_attendees first if foreign key isn't set to CASCADE
+            // $this->db->query('DELETE FROM event_attendees WHERE event_id = :event_id');
+            // $this->db->bind(':event_id', $id, PDO::PARAM_INT);
+            // $this->db->execute();
+
+            $this->db->query('DELETE FROM events WHERE id = :id AND artisan_id = :artisan_id');
+            $this->db->bind(':id', $id, PDO::PARAM_INT);
+            $this->db->bind(':artisan_id', $artisanId, PDO::PARAM_INT);
+            return $this->db->execute();
+        } catch (Exception $e) {
+            error_log("Error deleting event ID ($id) for artisan ($artisanId): " . $e->getMessage());
+            return false;
+        }
+    }
 }

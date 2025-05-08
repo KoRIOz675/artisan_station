@@ -121,6 +121,39 @@ elseif (
     $params = [$urlParts[2]]; // Pass event ID
     $routeFound = true;
 }
+// Pattern: /events/edit/{id}
+elseif (
+    isset($urlParts[0]) && $urlParts[0] == 'events' &&
+    isset($urlParts[1]) && $urlParts[1] == 'edit' &&
+    isset($urlParts[2])
+) { // id
+    $controllerName = 'EventsController';
+    $methodName = 'edit';
+    $params = [$urlParts[2]]; // Pass event ID
+    $routeFound = true;
+}
+// Pattern: /events/update/{id} (POST)
+elseif (
+    isset($urlParts[0]) && $urlParts[0] == 'events' &&
+    isset($urlParts[1]) && $urlParts[1] == 'update' &&
+    isset($urlParts[2]) && $_SERVER['REQUEST_METHOD'] == 'POST' // Ensure POST
+) { // id
+    $controllerName = 'EventsController';
+    $methodName = 'update';
+    $params = [$urlParts[2]]; // Pass event ID
+    $routeFound = true;
+}
+// Pattern: /events/delete/{id} (POST)
+elseif (
+    isset($urlParts[0]) && $urlParts[0] == 'events' &&
+    isset($urlParts[1]) && $urlParts[1] == 'delete' &&
+    isset($urlParts[2]) && $_SERVER['REQUEST_METHOD'] == 'POST' // Ensure POST
+) { // id
+    $controllerName = 'EventsController';
+    $methodName = 'delete';
+    $params = [$urlParts[2]]; // Pass event ID
+    $routeFound = true;
+}
 // Pattern: /products/create (GET)
 elseif (isset($urlParts[0]) && $urlParts[0] == 'products' && isset($urlParts[1]) && $urlParts[1] == 'create' && !isset($urlParts[2])) {
     $controllerName = 'ProductsController';

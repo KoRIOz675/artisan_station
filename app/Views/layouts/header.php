@@ -26,6 +26,8 @@
             <span> | </span>
             <a href="<?php echo URLROOT; ?>/marketplace">Marketplace</a>
             <span> | </span>
+            <a href="<?php echo URLROOT; ?>/events">Events</a>
+            <span> | </span>
             <a href="<?php echo URLROOT; ?>/contact">Contact</a>
             <span> | </span>
 

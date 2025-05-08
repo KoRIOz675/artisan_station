@@ -211,9 +211,11 @@
                                     <td>
                                         <?php // Placeholder links - implement these routes/methods later 
                                         ?>
-                                        <a href="<?php echo URLROOT; ?>/events/view/<?php echo $event->slug; ?>" target="_blank">View</a> |
+                                        <a href="<?php echo URLROOT; ?>/events/show/<?php echo $event->slug; ?>" target="_blank">View</a> |
                                         <a href="<?php echo URLROOT; ?>/events/edit/<?php echo $event->id; ?>">Edit</a> |
-                                        <a href="<?php echo URLROOT; ?>/events/delete/<?php echo $event->id; ?>" onclick="return confirm('Are you sure you want to delete this event?');" style="color: red;">Delete</a>
+                                        <form action="<?php echo URLROOT; ?>/events/delete/<?php echo $event->id; ?>" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this event? This is permanent!');">
+                                            <button type="submit" style="color: red; border: none; background: none; padding: 0; font: inherit; cursor: pointer;">Delete</button>
+                                        </form>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

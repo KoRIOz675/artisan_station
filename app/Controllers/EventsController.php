@@ -4,11 +4,13 @@ class EventsController extends Controller
 {
 
     private $eventModel;
+    private $userModel;
 
     public function __construct()
     {
 
         $this->eventModel = $this->model('Event');
+        $this->userModel = $this->model('Users');
         if (!$this->eventModel) {
             die("Error loading event resources.");
         }
@@ -253,6 +255,7 @@ class EventsController extends Controller
             $this->redirect('events'); // Fallback
         }
     }
+
     public function unattend($eventId = 0)
     {
         // 1. Check Login
@@ -281,5 +284,246 @@ class EventsController extends Controller
         } else {
             $this->redirect('events');
         }
+    }
+
+    public function edit($id = 0)
+    {
+        if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'artisan') {
+            flash('auth_error', 'Only artisans can edit events.', 'alert alert-danger');
+            $this->redirect('users/loginRegister');
+            return;
+        }
+
+        $id = filter_var($id, FILTER_VALIDATE_INT);
+        if (!$id || $id <= 0) {
+            flash('error', 'Invalid event ID.', 'alert alert-danger');
+            $this->redirect('users/dashboard#event-created');
+            return;
+        }
+
+        $event = $this->eventModel->getEventByIdForEdit($id);
+
+        if (!$event || $event->artisan_id != $_SESSION['user_id']) {
+            flash('error', 'Event not found or you do not have permission to edit it.', 'alert alert-danger');
+            $this->redirect('users/dashboard#event-created');
+            return;
+        }
+
+        // Prepare data for the form view
+        $data = [
+            'title' => 'Edit Event: ' . htmlspecialchars($event->name),
+            'event' => $event, // Pass the whole event object
+            'id' => $event->id,
+            'name' => $event->name,
+            'description' => $event->description,
+            // Convert datetime from DB to separate date and time for form fields
+            'start_datetime_form_value' => date('Y-m-d\TH:i', strtotime($event->start_datetime)),
+            'end_datetime_form_value' => !empty($event->end_datetime) ? date('Y-m-d\TH:i', strtotime($event->end_datetime)) : '',
+            'location' => $event->location,
+            'current_image_path' => $event->image_path,
+            'is_active' => $event->is_active,
+            'name_err' => '',
+            'description_err' => '',
+            'start_datetime_err' => '',
+            'end_datetime_err' => '',
+            'image_err' => '',
+            'general_err' => ''
+        ];
+
+        $this->view('events/edit', $data);
+    }
+
+    public function update($id = 0)
+    {
+        // Ensure user is an artisan and request is POST
+        if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'artisan') {
+            flash('auth_error', 'Unauthorized access.', 'alert alert-danger');
+            $this->redirect('users/loginRegister');
+            return;
+        }
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('users/dashboard#event-created');
+            return;
+        }
+
+        $id = filter_var($id, FILTER_VALIDATE_INT);
+        if (!$id || $id <= 0) {
+            flash('error', 'Invalid event ID.', 'alert alert-danger');
+            $this->redirect('users/dashboard#event-created');
+            return;
+        }
+
+        // Fetch original event to check ownership and get current image path
+        $originalEvent = $this->eventModel->getEventByIdForEdit($id);
+        if (!$originalEvent || $originalEvent->artisan_id != $_SESSION['user_id']) {
+            flash('error', 'Event not found or permission denied for update.', 'alert alert-danger');
+            $this->redirect('users/dashboard#event-created');
+            return;
+        }
+
+        // Sanitize POST data - CORRECTED LINES
+        $input_name = trim(filter_input(INPUT_POST, 'name', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? '');
+        $input_description = trim(filter_input(INPUT_POST, 'description', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? '');
+        $raw_start_datetime = filter_input(INPUT_POST, 'start_datetime', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        $raw_end_datetime = filter_input(INPUT_POST, 'end_datetime', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        $input_location = trim(filter_input(INPUT_POST, 'location', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? '');
+        $input_is_active = isset($_POST['is_active']) ? 1 : 0;
+
+        $startDateTime = $raw_start_datetime ? DateTime::createFromFormat('Y-m-d\TH:i', $raw_start_datetime) : false;
+
+        $endDateTime = null; // Default for optional end date
+        if (!empty($raw_end_datetime)) {
+            $endDateTime = DateTime::createFromFormat('Y-m-d\TH:i', $raw_end_datetime);
+            // $endDateTime will be false if parsing failed
+        }
+
+        // Prepare data for validation and view reload
+        $data = [
+            'title' => 'Edit Event: ' . htmlspecialchars($input_name),
+            'event' => $originalEvent, // Pass original event for view if errors
+            'id' => $id,
+            'name' => $input_name,
+            'description' => $input_description,
+            'start_datetime_form_value' => $raw_start_datetime,
+            'end_datetime_form_value' => $raw_end_datetime,
+            'location' => $input_location,
+            'current_image_path' => $originalEvent->image_path,
+            'is_active' => $input_is_active,
+            'name_err' => '',
+            'description_err' => '',
+            ' start_datetime_err ' => ' ',
+            ' end_datetime_err ' => ' ',
+            'image_err' => '',
+            'general_err' => ''
+        ];
+
+        // --- Validation ---
+        if (empty($data['name'])) $data['name_err'] = 'Please enter the event name.';
+        if (empty($data['description'])) $data['description_err'] = 'Please enter a description.';
+
+        if (!$startDateTime) {
+            $data['start_datetime_err'] = 'Invalid start date or time format. Please use the date picker.';
+        }
+
+        if (!empty($raw_end_datetime) && $endDateTime === false) {
+            // Only set error if a value was provided for end_datetime but it was invalid
+            $data['end_datetime_err'] = 'Invalid end date or time format. Please use the date picker.';
+        } elseif ($endDateTime && $startDateTime && $endDateTime < $startDateTime) {
+            $data['end_datetime_err'] = 'End date/time cannot be before start date/time.';
+        }
+
+        // --- Image Upload Handling (if a new image is provided) ---
+        // ... (image handling logic remains the same) ...
+        $newImageFilename = null;
+        $deleteOldImage = false;
+        if (isset($_FILES['image']) && $_FILES['image']['error'] == UPLOAD_ERR_OK) {
+            $fileTmpPath = $_FILES['image']['tmp_name'];
+            $fileName = basename($_FILES['image']['name']);
+            $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+            $allowedfileExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+            $maxFileSize = 2 * 1024 * 1024; // 2MB
+
+            if (!in_array($fileExtension, $allowedfileExtensions)) {
+                $data['image_err'] = 'Invalid file type.';
+            } elseif ($_FILES['image']['size'] > $maxFileSize) {
+                $data['image_err'] = 'File size exceeds 2MB limit.';
+            } else {
+                $newFileName = uniqid('event_', true) . '.' . $fileExtension;
+                $dest_path = EVENT_IMG_UPLOAD_DIR . $newFileName;
+                if (move_uploaded_file($fileTmpPath, $dest_path)) {
+                    $newImageFilename = $newFileName;
+                    $deleteOldImage = true;
+                } else {
+                    $data['image_err'] = 'Error uploading new image.';
+                    error_log("Error moving updated event image to: " . $dest_path);
+                }
+            }
+        } elseif (isset($_FILES['image']) && $_FILES['image']['error'] != UPLOAD_ERR_NO_FILE  && $_FILES['image']['error'] != UPLOAD_ERR_OK) {
+            $data['image_err'] = 'File upload error code: ' . $_FILES['image']['error'];
+        }
+
+
+        // --- If No Errors, Proceed to Update ---
+        if (empty($data['name_err']) && empty($data['description_err']) && empty($data['start_datetime_err']) && empty($data['end_datetime_err']) && empty($data['image_err'])) {
+            $eventDataForModel = [
+                'id' => $id,
+                'artisan_id' => $_SESSION['user_id'],
+                'name' => $data['name'],
+                'description' => $data['description'],
+                'start_datetime' => $startDateTime->format('Y-m-d H:i:s'), // Format for DB
+                'end_datetime' => $endDateTime ? $endDateTime->format('Y-m-d H:i:s') : null, // Format for DB or null
+                'location' => $data['location'],
+                'is_active' => $data['is_active']
+            ];
+            if ($newImageFilename !== null) {
+                $eventDataForModel['image_path'] = $newImageFilename;
+            }
+
+            if ($this->eventModel->updateEvent($eventDataForModel)) {
+                if ($deleteOldImage && !empty($originalEvent->image_path) && $originalEvent->image_path != $newImageFilename) {
+                    $oldImagePathFull = EVENT_IMG_UPLOAD_DIR . $originalEvent->image_path;
+                    if (file_exists($oldImagePathFull)) {
+                        @unlink($oldImagePathFull);
+                    }
+                }
+                flash('event_update_success', 'Event updated successfully!', 'alert alert-success');
+                $this->redirect('users/dashboard#event-created');
+                return;
+            } else {
+                $data['general_err'] = 'Failed to update event. Please try again.';
+                if ($newImageFilename && file_exists(EVENT_IMG_UPLOAD_DIR . $newImageFilename)) {
+                    @unlink(EVENT_IMG_UPLOAD_DIR . $newImageFilename);
+                }
+            }
+        }
+        // If validation errors or DB update failed, reload the edit form with errors
+        $this->view('events/edit', $data);
+    }
+
+    public function delete($id = 0)
+    {
+        // Ensure user is an artisan and request is POST
+        if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'artisan') {
+            flash('auth_error', 'Unauthorized access.', 'alert alert-danger');
+            $this->redirect('users/loginRegister');
+            return;
+        }
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            flash('error', 'Invalid request method for delete.', 'alert alert-danger');
+            $this->redirect('users/dashboard#event-created');
+            return;
+        }
+
+        $id = filter_var($id, FILTER_VALIDATE_INT);
+        if (!$id || $id <= 0) {
+            flash('error', 'Invalid event ID for deletion.', 'alert alert-danger');
+            $this->redirect('users/dashboard#event-created');
+            return;
+        }
+
+        // Fetch event to get image path and verify ownership BEFORE deleting
+        $eventToDelete = $this->eventModel->getEventByIdForEdit($id);
+        if (!$eventToDelete || $eventToDelete->artisan_id != $_SESSION['user_id']) {
+            flash('error', 'Event not found or permission denied for deletion.', 'alert alert-danger');
+            $this->redirect('users/dashboard#event-created');
+            return;
+        }
+
+        // Attempt to delete event via model
+        if ($this->eventModel->deleteEvent($id, $_SESSION['user_id'])) { // We'll create this model method
+            // Delete image file AFTER successful DB deletion
+            if (!empty($eventToDelete->image_path)) {
+                $imagePathFull = EVENT_IMG_UPLOAD_DIR . $eventToDelete->image_path;
+                if (file_exists($imagePathFull)) {
+                    if (!@unlink($imagePathFull)) {
+                        error_log("Failed to delete event image (permissions?): " . $imagePathFull);
+                    }
+                }
+            }
+            flash('event_delete_success', 'Event deleted successfully.', 'alert alert-success');
+        } else {
+            flash('event_delete_error', 'Failed to delete event.', 'alert alert-danger');
+        }
+        $this->redirect('users/dashboard#event-created');
     }
 }
